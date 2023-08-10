@@ -26,7 +26,7 @@
         </a>
       </h1>
       <nav id="configure-nav">
-        <a id="link-help" tabindex="0" title="How to play">❓</a>
+        <a id="link-help" tabindex="0" title="How to play" onclick="dialogHelp.showModal()">❓</a>
         <a id="link-stats" tabindex="0" title="Statistics">📊</a>
         <a id="link-settings" tabindex="0" title="Settings">🛠️</a>
       </nav>
@@ -37,6 +37,46 @@
     <footer>
       <simple-keyboard id="keyboard"></simple-keyboard>
     </footer>
+    <dialog id="dialogHelp">
+      <form method="dialog">
+        <h2>How To Play</h2>
+        <p>Guess the number in less than 9 attempts</p>
+        <ul>
+          <li>Each guess must not have any repeating digits, the hidden number is all unique digits</li>
+          <li>The number to the left of the guess shows how many digits are in the correct position</li>
+          <li>The number to the right of the guess shows how many digits are in the wrong position</li>
+        </ul>
+        <h3>Examples</h3>
+        <div class="example-entry">
+          <div class="guess-entry" title="1347" aria-disabled="true" tab-index="0" aria-hidden="false">
+            <span class="guess-dead" tab-index="0" title="0 dead">0</span>
+            <span class="guess-injured" tab-index="0" title="3 injured">3</span>
+            <span class="guess-digit" filled="true">1</span>
+            <span class="guess-digit"filled="true">3</span>
+            <span class="guess-digit" filled="true">4</span>
+            <span class="guess-digit" filled="true">7</span>
+          </div>
+          <span>
+            The guess <code>1347</code> has <code>3</code> digits in common with the number but <code>0</code> in the correct position.
+          </span>
+        </div>
+        <div class="example-entry">
+          <div class="guess-entry" title="7143" aria-disabled="true" tab-index="0" aria-hidden="false">
+            <span class="guess-dead" tab-index="0" title="3 dead">3</span>
+            <span class="guess-injured" tab-index="0" title="0 injured">0</span>
+            <span class="guess-digit" filled="true">7</span>
+            <span class="guess-digit"filled="true">1</span>
+            <span class="guess-digit" filled="true">4</span>
+            <span class="guess-digit" filled="true">3</span>
+          </div>
+          <span>
+            The guess <code>7143</code> has <code>3</code> digits in common with the number and they are all in the correct position.
+          </span>
+        </div>
+        <br />
+        <button>Close</button>
+      </form>
+    </dialog>
     <script src="static/app/app.js"></script>
   </body>
 </html>
