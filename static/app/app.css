@@ -12,7 +12,7 @@ html {
 }
 
 * {
-  transition: all 0.2s ease-in-out;
+  transition: height, width 0.2s ease-in-out, opacity 0.3s ease-in-out;
 }
 
 html,
@@ -84,6 +84,8 @@ header {
   z-index: var(--level-top);
 
   & nav {
+    display: flex;
+    flex-direction: row;
     font-size: 2em;
     padding: 0 0.4em;
     position: absolute;
@@ -151,7 +153,7 @@ main {
   }
 
   &[aria-hidden="true"] {
-    margin-top: -2.1em;
+    margin-top: -2em;
     z-index: var(--level-btm);
 
     & span {
@@ -285,5 +287,27 @@ footer {
     border-width: 0.1em;
     font-size: 2em;
     padding: 0.5em;
+  }
+}
+
+/** Mobile */
+@media (max-width: 640px) {
+  header {
+    & h1 {
+      margin-left: -1em;
+    }
+
+    & nav {
+      font-size: 1em;
+      padding: 0 0.2em;
+
+      & #current-day {
+        display: none;
+      }
+    }
+  }
+
+  main {
+    font-size: 1.4em;
   }
 }
