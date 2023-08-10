@@ -52,14 +52,16 @@ h1 {
   font-size: 2em;
 }
 
-a, button {
+a,
+button {
   color: inherit;
   cursor: pointer;
   padding: 0.2em 0.4em;
   text-decoration: none;
 }
 
-button {
+button,
+select {
   background-color: var(--color-bg);
   border-radius: 0.4em;
   border-style: solid;
@@ -236,6 +238,31 @@ dialog {
   }
 }
 
+#dialogConfig > form > .config-opt {
+  display: flex;
+  flex-direction: row;
+  gap: 1em;
+  justify-content: space-between;
+  margin: 0.5em 0;
+
+  & .opt-desc {
+    flex-grow: 1;
+  }
+
+  & .opt-ctrl {
+    align-items: center;
+    display: flex;
+    width: fit-content;
+    gap: 0.4em;
+    justify-content: end;
+    width: 100px;
+  }
+
+  #opt-digits {
+    padding: 0.5em 1em;
+  }
+}
+
 footer {
   align-items: center;
   background-color: var(--color-bg);
@@ -243,6 +270,7 @@ footer {
   border-top-width: 0.1em; */
   bottom: 0;
   display: flex;
+  flex-direction: column;
   justify-content: center;
   margin: 0 auto;
   padding: 1em;

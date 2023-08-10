@@ -21,6 +21,7 @@ const MAX_GUESS_COUNT = 9;
 const MAX_DIGIT_COUNT = 10;
 /** @type {{
   setting: {
+    darkMode: boolean,
     digits: number,
     hints: {
       disableImpossible: boolean,
@@ -31,6 +32,7 @@ const MAX_DIGIT_COUNT = 10;
 }} */
 const EMPTY_PROFILE = Object.freeze({
   setting: {
+    darkMode: false,
     digits: 4,
     hints: {
       disableImpossible: false,
@@ -50,6 +52,51 @@ const EMPTY_PROFILE = Object.freeze({
  * @param {ReturnType<typeof loadProfile>} profile
  */
 function initWith(profile) {
+  // controls
+  // theme
+  const themes = ["light", "dark"];
+  const updateTheme = () =>
+    document.body.parentElement?.setAttribute(
+      "theme",
+      themes[Number(profile.setting.darkMode)]
+    );
+  themes.forEach((t) => {
+    document.getElementById(`btn-theme-${t}`)?.addEventListener("click", () => {
+      profile.setting.darkMode = !!themes.indexOf(t);
+      saveProfile(profile);
+      updateTheme();
+    });
+  });
+  updateTheme();
+
+  // digit count
+  const digitCountOptMin = 3,
+    digitCountOptMax = 7;
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-expect-error typescript can not handle it
+  /** @type {HTMLSelectElement} */ const optWrapper =
+    document.getElementById("opt-digits");
+  optWrapper && (optWrapper.innerHTML = "");
+  optWrapper?.addEventListener("change", () => {
+    const newValue = Number(optWrapper.value);
+    if (Number.isNaN(newValue)) return;
+    profile.setting.digits = Math.max(
+      Math.min(newValue, digitCountOptMax),
+      digitCountOptMin
+    );
+    saveProfile(profile);
+  });
+  new Array(digitCountOptMax - digitCountOptMin + 1)
+    .fill(null)
+    .forEach((_, i) => {
+      const value = digitCountOptMin + i;
+      const selectOpt = document.createElement("option");
+      selectOpt.selected = value === profile.setting.digits;
+      selectOpt.value = String(value);
+      selectOpt.innerText = selectOpt.value;
+      optWrapper?.appendChild(selectOpt);
+    });
+
   // previous day
   const prevGameDate = getGameDate();
   prevGameDate.setDate(prevGameDate.getDate() - 1);
@@ -86,7 +133,6 @@ function initWith(profile) {
     "title",
     `Link to current game ${gameDate.toLocaleDateString()}`
   );
-  const numberForTheDay = getNumberForDate(profile.setting.digits, gameDate);
   if (!profile.stats[gameKey]) {
     profile.stats[gameKey] = {
       guesses: [],
@@ -94,8 +140,9 @@ function initWith(profile) {
       solved: false,
     };
   }
-
   const currentGame = profile.stats[gameKey];
+  const numDigits = currentGame.guesses[0]?.length || profile.setting.digits;
+  const numberForTheDay = getNumberForDate(numDigits, gameDate);
 
   // update game state
   const gameKeyboard = document.getElementById(ID_SIMPLE_KEYBOARD);
@@ -292,7 +339,7 @@ function renderGuesses(guesses, actual, stagedGuess) {
 
   const isSolved = guesses.slice(-1)[0] === actual;
 
-  new Array(isSolved ? guesses.length : MAX_GUESS_COUNT + 1)
+  new Array(MAX_GUESS_COUNT + 1)
     .fill("")
     .map((g, i) => {
       const useStaged = i === guesses.length;
@@ -302,7 +349,7 @@ function renderGuesses(guesses, actual, stagedGuess) {
         useStaged,
         guessesContainer.children.item(i)
       );
-      guessWrapper.ariaHidden = i > guesses.length ? "true" : "false";
+      guessWrapper.ariaHidden = String(i > guesses.length || (i === guesses.length && isSolved));
       return guessWrapper;
     })
     .forEach((c) => moveChildInto(guessesContainer, c));
@@ -342,20 +389,26 @@ function renderGuessEntry(guess, actual, isStaged, recycle) {
 
   let deadCount = 0;
   let injuredCount = 0;
+  const digitWrappers = guessDivWrapper.getElementsByClassName(CLS_GUESS_DIGIT);
   actual
     .split("")
     .map((n, i) => {
       if (n === guess[i]) deadCount += 1;
       if (guess.includes(n)) injuredCount += 1;
       const digitWrapper =
-        guessDivWrapper.getElementsByClassName(CLS_GUESS_DIGIT).item(i) ??
-        document.createElement("span");
+        digitWrappers.item(i) ?? document.createElement("span");
       digitWrapper.className = CLS_GUESS_DIGIT;
       digitWrapper.textContent = guess[i] ?? "";
       digitWrapper.setAttribute("filled", String(!!digitWrapper.textContent));
       return digitWrapper;
     })
     .forEach((c) => moveChildInto(guessDivWrapper, c));
+  // clear out left over elements
+  Array.from(digitWrappers)
+    .slice(actual.length)
+    .forEach((w) => {
+      guessDivWrapper.removeChild(w)
+    });
   injuredCount -= deadCount;
 
   if (guess && !isStaged) {

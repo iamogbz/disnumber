@@ -12,6 +12,8 @@
     <link rel="apple-touch-icon" href="static/assets/images/logo-512.png" />
     <!-- scripts -->
     <script src="https://cdn.jsdelivr.net/gh/iamogbz/oh-my-wcs@main/components/simple-keyboard.js"></script>
+    <script type="module" src="https://unpkg.com/wired-elements/lib/wired-listbox.js?module"></script>
+    <script type="module" src="https://unpkg.com/wired-elements/lib/wired-toggle.js?module"></script>
   </head>
   <body>
     <header>
@@ -27,8 +29,8 @@
       </h1>
       <nav id="configure-nav">
         <a id="link-help" tabindex="0" title="How to play" onclick="dialogHelp.showModal()">❓</a>
-        <a id="link-stats" tabindex="0" title="Statistics">📊</a>
-        <a id="link-settings" tabindex="0" title="Settings">🛠️</a>
+        <a id="link-stats" tabindex="0" title="Statistics" onclick="dialogStats.showModal()">📊</a>
+        <a id="link-settings" tabindex="0" title="Settings" onclick="dialogConfig.showModal()">🛠️</a>
       </nav>
     </header>
     <main>
@@ -36,6 +38,7 @@
     </main>
     <footer>
       <simple-keyboard id="keyboard"></simple-keyboard>
+      <p id="label-copyright">&copy <script>document.write(new Date().getFullYear())</script> Ogbizi</p>
     </footer>
     <dialog id="dialogHelp">
       <form method="dialog">
@@ -71,6 +74,45 @@
           </div>
           <span>
             The guess <code>7143</code> has <code>3</code> digits in common with the number and they are all in the correct position.
+          </span>
+        </div>
+        <br />
+        <button>Close</button>
+      </form>
+    </dialog>
+    <dialog id="dialogStats">
+      <form method="dialog">
+        <h2>Statistics</h2>
+        <button>Close</button>
+      </form>
+    </dialog>
+    <dialog id="dialogConfig">
+      <form method="dialog">
+        <h2>Settings</h2>
+        <br />
+        <div class="config-opt">
+          <span class="opt-desc">
+            <h3>Theme</h3>
+            <sub>Takes effect immediately</sub>
+          </span>
+          <span class="opt-ctrl"><button id="btn-theme-light">Light</button><button id="btn-theme-dark">Dark</button></span>
+        </div>
+        <div class="config-opt">
+          <span class="opt-desc">
+            <h3>Digits</h3>
+            <sub>Increase for a challenge, applies to the next new puzzle</sub>
+          </span>
+          <span class="opt-ctrl"><select id="opt-digits"></select></span>
+        </div>
+        <div class="config-opt">
+          <span class="opt-desc">
+            <h3>Feedback</h3>
+            <sub>feature request, file a bug, feel good message</sub>
+          </span>
+          <span class="opt-ctrl">
+            <a id="link-feedback" href="https://github.com/iamogbz/dai-pwa/issues/new/choose" target="_blank">
+              GitHub
+            </a>
           </span>
         </div>
         <br />
