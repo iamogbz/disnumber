@@ -298,6 +298,7 @@ function renderGuessEntry(guess, actual, isStaged, recycle) {
         document.createElement("span");
       digitWrapper.className = CLS_GUESS_DIGIT;
       digitWrapper.textContent = guess[i] ?? "";
+      digitWrapper.setAttribute("filled", String(!!digitWrapper.textContent));
       return digitWrapper;
     })
     .forEach((c) => moveChildInto(guessDivWrapper, c));

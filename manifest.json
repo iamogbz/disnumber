@@ -1,10 +1,10 @@
 {
   "background_color": "#ffffff",
   "theme_color": "#333333",
-  "name": "Dead And Injured",
+  "name": "Disnumber",
   "short_name": "dai",
   "display": "minimal-ui",
-  "start_url": "/static/app",
+  "start_url": "/",
   "icons": [
     {
       "src": "/static/assets/images/logo-192.png",

@@ -12,7 +12,7 @@ html {
 }
 
 * {
-  transition: all 0.3s ease-in-out;
+  transition: all 0.2s ease-in-out;
 }
 
 html,
@@ -73,6 +73,7 @@ main {
   justify-content: center;
   margin: 0 auto;
   padding: 1em;
+  user-select: none;
 
   #guesses {
     align-items: center;
@@ -119,9 +120,12 @@ main {
       }
 
       &[aria-disabled="true"] {
-
         & .guess-digit {
-          background-color: color-mix(in srgb, var(--color-fg) 14%, transparent);
+          background-color: color-mix(
+            in srgb,
+            var(--color-fg) 14%,
+            transparent
+          );
           border-color: transparent;
         }
       }
@@ -133,6 +137,11 @@ main {
       .guess-digit {
         background-color: color-mix(in srgb, var(--color-bg) 100%, transparent);
         position: relative;
+        transform: scale(1);
+
+        &[filled="false"] {
+          transform: scale(0.9);
+        }
       }
 
       .guess-dead,
@@ -172,18 +181,23 @@ main {
 footer {
   align-items: center;
   background-color: var(--color-bg);
-  border-top-style: solid;
-  border-top-width: 0.1em;
+  /* border-top-style: solid;
+  border-top-width: 0.1em; */
   bottom: 0;
   display: flex;
   justify-content: center;
   margin: 0 auto;
   padding: 1em;
-  position: sticky;
-  /* width: calc(100% - 2em);
+  /* position: sticky;
+  width: 100%;
   z-index: var(--level-top); */
 
   & simple-keyboard {
+    background-color: var(--color-bg);
+    border-radius: 0.6em;
+    border-style: solid;
+    border-width: 0.1em;
     font-size: 2em;
+    padding: 0.5em;
   }
 }
