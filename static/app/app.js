@@ -1,6 +1,9 @@
 const APP_KEY_PROFILE = "dai-app-profile";
 const ID_SIMPLE_KEYBOARD = "keyboard";
 const ID_GUESSES_WRAPPER = "guesses";
+const ID_LINK_PREV_DAY = "link-prev-day";
+const ID_LINK_NEXT_DAY = "link-next-day";
+const ID_CURRENT_DAY_TAG = "current-day";
 const KEY_BKSPC = "Backspace";
 const KEY_ENTER = "Enter";
 const ALLOWED_NUMBERS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 0];
@@ -38,11 +41,52 @@ const EMPTY_PROFILE = Object.freeze({
 });
 
 (function init() {
-  const profile = loadProfile();
-  // TODO: support loading previous date puzzle but not future
-  const today = new Date();
-  const gameKey = getGameKey(today);
-  const numberForTheDay = getNumberForDate(profile.setting.digits, today);
+  const initApp = () => initWith(loadProfile());
+  window.addEventListener("hashchange", initApp);
+  initApp();
+})();
+
+/**
+ * @param {ReturnType<typeof loadProfile>} profile
+ */
+function initWith(profile) {
+  // previous day
+  const prevGameDate = getGameDate();
+  prevGameDate.setDate(prevGameDate.getDate() - 1);
+  const prevDayGameKey = getGameKey(prevGameDate);
+  const linkToPreviousDay = document.getElementById(ID_LINK_PREV_DAY);
+  linkToPreviousDay?.setAttribute("href", `#${prevDayGameKey}`);
+  linkToPreviousDay?.setAttribute(
+    "title",
+    `Go to game for ${prevGameDate.toLocaleDateString()}`
+  );
+
+  // following day
+  const nextGameDate = getGameDate();
+  const linkToNextDay = document.getElementById(ID_LINK_NEXT_DAY);
+  nextGameDate.setDate(nextGameDate.getDate() + 1);
+  if (nextGameDate.getTime() < Date.now()) {
+    const nextGameDateKey = getGameKey(nextGameDate);
+    linkToNextDay?.setAttribute("href", `#${nextGameDateKey}`);
+    linkToNextDay?.setAttribute(
+      "title",
+      `Go to game for ${nextGameDate.toLocaleDateString()}`
+    );
+  } else {
+    linkToNextDay?.setAttribute("href", "#");
+    linkToNextDay?.setAttribute("title", "Come back tomorrow for a new puzzle");
+  }
+
+  // init for current game date
+  const gameDate = getGameDate();
+  const gameKey = getGameKey(gameDate);
+  const currentDayLabel = document.getElementById(ID_CURRENT_DAY_TAG);
+  currentDayLabel?.setAttribute("href", `#${gameKey}`);
+  currentDayLabel?.setAttribute(
+    "title",
+    `Link to current game ${gameDate.toLocaleDateString()}`
+  );
+  const numberForTheDay = getNumberForDate(profile.setting.digits, gameDate);
   if (!profile.stats[gameKey]) {
     profile.stats[gameKey] = {
       guesses: [],
@@ -76,9 +120,9 @@ const EMPTY_PROFILE = Object.freeze({
     if (isOverGuessLimit || lastGuessWasCorrect) {
       currentGame.inProgress = false;
       currentGame.solved = lastGuessWasCorrect;
-      if (gameKeyboard) {
-        gameKeyboard.ariaDisabled = "true";
-      }
+      gameKeyboard && (gameKeyboard.ariaDisabled = "true");
+    } else {
+      gameKeyboard && (gameKeyboard.ariaDisabled = "false");
     }
 
     const currentGuess = stagedGuess.join("");
@@ -113,7 +157,7 @@ const EMPTY_PROFILE = Object.freeze({
   }
 
   update();
-})();
+}
 
 function loadProfile() {
   return { ...loadValue(APP_KEY_PROFILE, EMPTY_PROFILE) };
@@ -155,6 +199,16 @@ function storeValue(key, value) {
   } catch (e) {
     console.error(e);
   }
+}
+
+/**
+ * Get game date, clamping to current date but allowing previous days
+ */
+function getGameDate() {
+  const now = Date.now();
+  const hashDate = new Date(window.location.hash.split("#").pop() ?? now);
+  if (Number.isNaN(hashDate.getTime())) return new Date(now);
+  return new Date(Math.min(now, hashDate.getTime()));
 }
 
 /**
@@ -317,6 +371,8 @@ function renderGuessEntry(guess, actual, isStaged, recycle) {
     } else {
       guessDivWrapper.classList.add(CLS_GUESS_ENTRY_SOLVED);
     }
+  } else {
+    guessDivWrapper.ariaDisabled = "false";
   }
 
   return guessDivWrapper;
