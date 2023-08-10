@@ -3,9 +3,10 @@ const ID_SIMPLE_KEYBOARD = "keyboard";
 const ID_GUESSES_WRAPPER = "guesses";
 const KEY_BKSPC = "Backspace";
 const KEY_ENTER = "Enter";
+const ALLOWED_NUMBERS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 0];
 const GAME_KEYBOARD = [
-  [1, 2, 3, 4, 5],
-  [6, 7, 8, 9, 0],
+  ALLOWED_NUMBERS.slice(0, Math.ceil(ALLOWED_NUMBERS.length / 2)),
+  ALLOWED_NUMBERS.slice(-Math.floor(ALLOWED_NUMBERS.length / 2)),
   [KEY_BKSPC, "", KEY_ENTER],
 ];
 const CLS_GUESS_ENTRY = "guess-entry";
@@ -23,7 +24,7 @@ const MAX_DIGIT_COUNT = 10;
       enableBestGuesses: boolean,
     },
   },
-  stats: Record<string, {guesses: string[], solved: boolean}>,
+  stats: Record<string, {guesses: string[], inProgress: boolean, solved: boolean}>,
 }} */
 const EMPTY_PROFILE = Object.freeze({
   setting: {
@@ -45,67 +46,72 @@ const EMPTY_PROFILE = Object.freeze({
   if (!profile.stats[gameKey]) {
     profile.stats[gameKey] = {
       guesses: [],
+      inProgress: true,
       solved: false,
     };
   }
 
   const currentGame = profile.stats[gameKey];
-  // if (
-  //   currentGame.guesses.length &&
-  //   currentGame.guesses.slice(-1)[0] === numberForTheDay
-  // ) {
-  //   currentGame.solved = true;
-  // }
-  // saveProfile(profile);
 
   // update game state
   const gameKeyboard = document.getElementById(ID_SIMPLE_KEYBOARD);
   /** @type {string[]} */ const stagedGuess = [];
   const hasStagedGuess = () => stagedGuess.length;
   const stagedGuessIsComplete = () =>
-    stagedGuess.length === numberForTheDay.length;
+    stagedGuess.length >= numberForTheDay.length;
   const update = () => {
     const disabled = [...stagedGuess];
     if (!hasStagedGuess()) {
       disabled.push(KEY_BKSPC);
     }
-    if (!stagedGuessIsComplete()) {
+    if (stagedGuessIsComplete()) {
+      disabled.push(...ALLOWED_NUMBERS.map(String));
+    } else {
       disabled.push(KEY_ENTER);
     }
 
-    const gameOver =
-      currentGame.solved || currentGame.guesses.length >= MAX_GUESS_COUNT;
-    if (gameOver && gameKeyboard) {
-      gameKeyboard.ariaDisabled = "true";
+    const isOverGuessLimit = currentGame.guesses.length >= MAX_GUESS_COUNT;
+    const lastGuessWasCorrect =
+      currentGame.guesses.slice(-1)[0] === numberForTheDay;
+    if (isOverGuessLimit || lastGuessWasCorrect) {
+      currentGame.inProgress = false;
+      currentGame.solved = lastGuessWasCorrect;
+      if (gameKeyboard) {
+        gameKeyboard.ariaDisabled = "true";
+      }
+    }
+
+    const currentGuess = stagedGuess.join("");
+    const previousGuesses = [...currentGame.guesses];
+    if (!currentGame.inProgress && !lastGuessWasCorrect) {
+      // reveal correct number
+      previousGuesses.push(numberForTheDay);
     }
 
     renderKeyboard(stagedGuess, disabled);
-    renderGuesses(currentGame.guesses, numberForTheDay, stagedGuess.join(""));
+    renderGuesses(previousGuesses, numberForTheDay, currentGuess);
+    saveProfile(profile);
   };
 
   // listen on game keyboard
   if (gameKeyboard) {
     gameKeyboard.onkeyup = (e) => {
-      const num = parseInt(e.key);
-      if (Number.isInteger(num) && !stagedGuess.includes(e.key)) {
+      const isValidGuessKey = (/** @type {string} */ k) =>
+        Number.isInteger(parseInt(k)) && !stagedGuess.includes(k);
+      if (isValidGuessKey(e.key)) {
         stagedGuess.push(e.key);
       } else if (e.key === KEY_BKSPC) {
         stagedGuess.pop();
       } else if (e.key === KEY_ENTER && stagedGuessIsComplete()) {
         const completeGuess = stagedGuess.splice(0).join("");
         currentGame.guesses.push(completeGuess);
-        if (completeGuess === numberForTheDay) {
-          currentGame.solved = true;
-        }
       }
-      saveProfile(profile);
       update();
     };
   } else {
     console.error("Game keyboard not initialised");
   }
 
-  saveProfile(profile);
   update();
 })();
 
@@ -230,74 +236,96 @@ function renderGuesses(guesses, actual, stagedGuess) {
   const guessesContainer = document.getElementById(ID_GUESSES_WRAPPER);
   if (!guessesContainer) return;
 
-  guessesContainer.innerHTML = "";
   const isSolved = guesses.slice(-1)[0] === actual;
 
-  new Array(isSolved ? guesses.length : MAX_GUESS_COUNT)
+  new Array(isSolved ? guesses.length : MAX_GUESS_COUNT + 1)
     .fill("")
-    .forEach((g, i) => {
+    .map((g, i) => {
       const useStaged = i === guesses.length;
-      const guessWrapper = getGuessDiv(
+      const guessWrapper = renderGuessEntry(
         guesses[i] ?? (useStaged ? stagedGuess : g),
         actual,
-        useStaged
+        useStaged,
+        guessesContainer.children.item(i)
       );
-      if (i > guesses.length) {
-        guessWrapper.ariaHidden = "true";
-      }
-      guessesContainer.appendChild(guessWrapper);
-    });
+      guessWrapper.ariaHidden = i > guesses.length ? "true" : "false";
+      return guessWrapper;
+    })
+    .forEach((c) => moveChildInto(guessesContainer, c));
 
-  document.body.scrollBy(0, guessesContainer.scrollHeight);
+  document.body.scrollBy({
+    behavior: "smooth",
+    left: 0,
+    top: guessesContainer.scrollHeight,
+  });
 }
 
 /**
  * @param {string} guess
  * @param {string} actual
  * @param {boolean} isStaged
+ * @param {Element?} recycle
  */
-function getGuessDiv(guess, actual, isStaged) {
+function renderGuessEntry(guess, actual, isStaged, recycle) {
   const guessTabIndex = 0;
-  const guessDivWrapper = document.createElement("div");
+  const guessDivWrapper = recycle ?? document.createElement("div");
   guessDivWrapper.className = CLS_GUESS_ENTRY;
-  guessDivWrapper.title = guess;
+  guessDivWrapper.setAttribute("title", guess);
+
+  const deadCountWrapper =
+    guessDivWrapper.getElementsByClassName(CLS_GUESS_COUNT_DEAD).item(0) ??
+    document.createElement("span");
+  deadCountWrapper.className = CLS_GUESS_COUNT_DEAD;
+  deadCountWrapper.setAttribute("tab-index", `${guessTabIndex}`);
+  moveChildInto(guessDivWrapper, deadCountWrapper);
+
+  const injuredCountWrapper =
+    guessDivWrapper.getElementsByClassName(CLS_GUESS_COUNT_INJURED).item(0) ??
+    document.createElement("span");
+  injuredCountWrapper.className = CLS_GUESS_COUNT_INJURED;
+  injuredCountWrapper.setAttribute("tab-index", `${guessTabIndex}`);
+  moveChildInto(guessDivWrapper, injuredCountWrapper);
 
   let deadCount = 0;
   let injuredCount = 0;
-  actual.split("").forEach((n, i) => {
-    if (n === guess[i]) deadCount += 1;
-    if (guess.includes(n)) injuredCount += 1;
-    const digitWrapper = document.createElement("span");
-    digitWrapper.className = CLS_GUESS_DIGIT;
-    guessDivWrapper.appendChild(digitWrapper);
-    digitWrapper.innerHTML = guess[i] ?? "";
-  });
+  actual
+    .split("")
+    .map((n, i) => {
+      if (n === guess[i]) deadCount += 1;
+      if (guess.includes(n)) injuredCount += 1;
+      const digitWrapper =
+        guessDivWrapper.getElementsByClassName(CLS_GUESS_DIGIT).item(i) ??
+        document.createElement("span");
+      digitWrapper.className = CLS_GUESS_DIGIT;
+      digitWrapper.textContent = guess[i] ?? "";
+      return digitWrapper;
+    })
+    .forEach((c) => moveChildInto(guessDivWrapper, c));
   injuredCount -= deadCount;
 
   if (guess && !isStaged) {
     guessDivWrapper.ariaDisabled = "true";
-    guessDivWrapper.tabIndex = guessTabIndex;
+    guessDivWrapper.setAttribute("tab-index", `${guessTabIndex}`);
 
     if (deadCount < actual.length) {
-      const deadCountWrapper = document.createElement("span");
-      deadCountWrapper.className = CLS_GUESS_COUNT_DEAD;
-      deadCountWrapper.tabIndex = guessTabIndex;
-      guessDivWrapper.appendChild(deadCountWrapper);
-
-      const injuredCountWrapper = document.createElement("span");
-      injuredCountWrapper.className = CLS_GUESS_COUNT_INJURED;
-      injuredCountWrapper.tabIndex = guessTabIndex;
-      guessDivWrapper.appendChild(injuredCountWrapper);
-
       deadCountWrapper.innerHTML = `${deadCount}`;
-      deadCountWrapper.title = `${deadCount} dead`;
+      deadCountWrapper.setAttribute("title", `${deadCount} dead`);
 
       injuredCountWrapper.innerHTML = `${injuredCount}`;
-      injuredCountWrapper.title = `${injuredCount} injured`;
+      injuredCountWrapper.setAttribute("title", `${injuredCount} injured`);
     } else {
       guessDivWrapper.classList.add(CLS_GUESS_ENTRY_SOLVED);
     }
   }
 
   return guessDivWrapper;
+}
+
+/**
+ * @param {Element} parentElement
+ * @param {Element} childElement
+ */
+function moveChildInto(parentElement, childElement) {
+  if (childElement.parentElement === parentElement) return;
+  parentElement.appendChild(childElement);
 }
