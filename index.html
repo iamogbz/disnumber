@@ -6,16 +6,23 @@
     <title>DISNUMBER ☠️ GAME</title>
     <link rel="manifest" href="manifest.json" />
     <link rel="stylesheet" href="static/app/app.css" />
-    <link rel="icon" href="static/assets/images/favicon.png" />
+    <link rel="icon" href="static/assets/images/favicon.jpg" />
     <!-- ios support -->
     <link rel="apple-touch-icon" href="static/assets/images/logo-192.png" />
     <link rel="apple-touch-icon" href="static/assets/images/logo-512.png" />
+    <!-- scripts -->
+    <script src="https://cdn.jsdelivr.net/gh/iamogbz/oh-my-wcs@23c805b/components/simple-keyboard.js"></script>
   </head>
   <body>
     <header>
       <h1>DISNUMBER</h1>
     </header>
-    <footer></footer>
+    <main>
+      <div id="guesses"></div>
+    </main>
+    <footer>
+      <simple-keyboard id="keyboard"></simple-keyboard>
+    </footer>
     <script src="static/app/app.js"></script>
   </body>
 </html>

@@ -1,10 +1,15 @@
 html,
 body {
+  --color-bg: #fff;
+  --color-fg: #333;
+  --level-btm: -1;
+  --level-top: 1;
+
   margin: 0;
   padding: 0;
   border: none;
-  background-color: #fff;
-  color: #333;
+  background-color: var(--color-bg);
+  color: var(--color-fg);
 }
 
 body {
@@ -35,12 +40,104 @@ a {
 }
 
 header {
-  display: flex;
+  align-items: center;
+  background-color: var(--color-bg);
   border: solid 0px;
   border-bottom-width: 1px;
-  padding: 1em;
-  align-items: center;
+  display: flex;
   justify-content: space-evenly;
+  padding: 1em;
+  position: sticky;
+  top: 0;
+  z-index: var(--level-top);
+}
+
+main {
+  align-items: center;
+  display: flex;
+  font-family: menlo, inconsolata, monospace;
+  font-size: 2em;
+  justify-content: center;
+  padding: 1em;
+
+  #guesses {
+    align-items: center;
+    display: flex;
+    flex-direction: column;
+    gap: 0.2em;
+    justify-content: center;
+    position: relative;
+
+    .guess-entry {
+      display: flex;
+      flex-direction: row;
+      gap: 0.2em;
+      padding: 0 0.2em;
+      position: relative;
+
+      &[aria-hidden="true"] {
+        display: none;
+      }
+
+      & span {
+        align-items: center;
+        border-color: initial;
+        border-radius: 0.1em;
+        border: solid 2px;
+        display: flex;
+        height: 1em;
+        justify-content: center;
+        padding: 0.4em;
+        width: 1em;
+      }
+
+      &.guess-correct .guess-digit {
+        border-image: linear-gradient(to bottom right, red, orange) 1;
+      }
+
+      &[aria-disabled="true"] .guess-digit {
+        background-color: color-mix(in srgb, var(--color-fg) 14%, transparent);
+        border-color: transparent;
+      }
+
+      .guess-digit {
+        position: relative;
+      }
+
+      .guess-dead,
+      .guess-injured {
+        font-weight: 900;
+        position: absolute;
+      }
+
+      .guess-dead {
+        color: red;
+        right: 100%;
+      }
+      .guess-injured {
+        color: orange;
+        left: 100%;
+      }
+    }
+  }
+}
+
+footer {
+  align-items: center;
+  background-color: var(--color-bg);
+  border: solid 0px;
+  border-top-width: 1px;
+  bottom: 0;
+  display: flex;
+  justify-content: center;
+  padding: 1em;
+  position: sticky;
+  /* width: calc(100% - 2em);
+  z-index: var(--level-top); */
+
+  & simple-keyboard {
+    font-size: 2em;
+  }
 }
 
 /* code {
