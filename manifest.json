@@ -4,15 +4,15 @@
   "name": "Dead And Injured",
   "short_name": "dai",
   "display": "minimal-ui",
-  "start_url": "/",
+  "start_url": "/static/app",
   "icons": [
     {
-      "src": "logo-192.png",
+      "src": "/static/assets/images/logo-192.png",
       "sizes": "192x192",
       "type": "image/png"
     },
     {
-      "src": "logo-512.png",
+      "src": "/static/assets/images/logo-512.png",
       "sizes": "512x512",
       "type": "image/png"
     }
