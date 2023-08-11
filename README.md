@@ -6,8 +6,8 @@ Dismember numbers until they are all dead!
 
 [Try Demo][pwa]
 
-![instructions](./static/assets/images/Screenshot_20230811-003922.png)
-![gamecomplete](./static/assets/images/Screenshot_20230811-003850.png)
+![instructions](https://raw.githubusercontent.com/iamogbz/dai-pwa/main/static/assets/images/Screenshot_20230811-003922.png)
+![gamecomplete](https://raw.githubusercontent.com/iamogbz/dai-pwa/main/static/assets/images/Screenshot_20230811-003850.png)
 
 > Alternatively [cli version][cli]
 
