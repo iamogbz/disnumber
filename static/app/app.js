@@ -83,7 +83,6 @@ function initWith(profile) {
   const numDigits = currentGame.guesses[0]?.length || profile.setting.digits;
   const numberForTheDay = getNumberForDate(numDigits, gameDate);
 
-  const gameKeyboard = document.getElementById(ID_SIMPLE_KEYBOARD);
   /** @type {string[]} */ const stagedGuess = [];
   const hasStagedGuess = () => stagedGuess.length;
   const stagedGuessIsComplete = () =>
@@ -127,9 +126,6 @@ function initWith(profile) {
       }
       currentGame.inProgress = false;
       currentGame.solved = lastGuessWasCorrect;
-      gameKeyboard?.setAttribute("disabled", "true");
-    } else {
-      gameKeyboard?.setAttribute("disabled", "false");
     }
 
     const guessesToRender = [...currentGame.guesses];
@@ -138,13 +134,14 @@ function initWith(profile) {
       guessesToRender.push(numberForTheDay);
     }
 
-    renderKeyboard(activeKeys, disabledKeys);
+    renderKeyboard(activeKeys, disabledKeys, currentGame.inProgress);
     renderGuesses(guessesToRender, numberForTheDay, currentGuess);
     renderStatistics(profile);
     saveProfile(profile);
   };
 
   // listen on game keyboard
+  const gameKeyboard = document.getElementById(ID_SIMPLE_KEYBOARD);
   if (gameKeyboard) {
     gameKeyboard.onkeyup = (e) => {
       const isValidGuessKey = (/** @type {string} */ k) =>
@@ -437,8 +434,9 @@ function initGameDayControl(gameDate, gameKey) {
 /**
  * @param {string[]} [active]
  * @param {string[]} [disabled]
+ * @param {boolean} [inProgress]
  */
-function renderKeyboard(active, disabled) {
+function renderKeyboard(active, disabled, inProgress) {
   const simpleKeyboard = document.getElementById(ID_SIMPLE_KEYBOARD);
   simpleKeyboard?.setAttribute(
     "keys",
@@ -457,13 +455,14 @@ function renderKeyboard(active, disabled) {
   if ((active?.length ?? 0) < ALLOWED_NUMBERS.length) {
     active?.forEach((k) => {
       simpleKeyboard?.shadowRoot
-        ?.querySelector(`[data-key="${k}"]:not([disabled])`)
+        ?.querySelector(`[data-key="${k}"]:not([aria-disabled])`)
         ?.setAttribute(
           "style",
           "box-shadow: inset var(--color-injured) 0 0 0.2em 0"
         );
     });
   }
+  simpleKeyboard?.setAttribute("aria-disabled", String(Boolean(!inProgress)));
 }
 
 /**
