@@ -35,8 +35,8 @@ const EMPTY_PROFILE = Object.freeze({
     darkMode: false,
     digits: 4,
     hints: {
-      disableImpossible: false,
-      enableBestGuesses: false,
+      disableImpossible: false, // TODO: add to settings dialog
+      enableBestGuesses: false, // TODO: add to settings dialog
     },
   },
   stats: {},
@@ -53,86 +53,13 @@ const EMPTY_PROFILE = Object.freeze({
  */
 function initWith(profile) {
   // controls
-  // theme
-  const themes = ["light", "dark"];
-  const updateTheme = () =>
-    document.body.parentElement?.setAttribute(
-      "theme",
-      themes[Number(profile.setting.darkMode)]
-    );
-  themes.forEach((t) => {
-    document.getElementById(`btn-theme-${t}`)?.addEventListener("click", () => {
-      profile.setting.darkMode = !!themes.indexOf(t);
-      saveProfile(profile);
-      updateTheme();
-    });
-  });
-  updateTheme();
-
-  // digit count
-  const digitCountOptMin = 3,
-    digitCountOptMax = 7;
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-expect-error typescript can not handle it
-  /** @type {HTMLSelectElement} */ const optWrapper =
-    document.getElementById("opt-digits");
-  optWrapper && (optWrapper.innerHTML = "");
-  optWrapper?.addEventListener("change", () => {
-    const newValue = Number(optWrapper.value);
-    if (Number.isNaN(newValue)) return;
-    profile.setting.digits = Math.max(
-      Math.min(newValue, digitCountOptMax),
-      digitCountOptMin
-    );
-    saveProfile(profile);
-  });
-  new Array(digitCountOptMax - digitCountOptMin + 1)
-    .fill(null)
-    .forEach((_, i) => {
-      const value = digitCountOptMin + i;
-      const selectOpt = document.createElement("option");
-      selectOpt.selected = value === profile.setting.digits;
-      selectOpt.value = String(value);
-      selectOpt.innerText = selectOpt.value;
-      optWrapper?.appendChild(selectOpt);
-    });
-
-  // previous day
-  const prevGameDate = getGameDate();
-  prevGameDate.setDate(prevGameDate.getDate() - 1);
-  const prevDayGameKey = getGameKey(prevGameDate);
-  const linkToPreviousDay = document.getElementById(ID_LINK_PREV_DAY);
-  linkToPreviousDay?.setAttribute("href", `#${prevDayGameKey}`);
-  linkToPreviousDay?.setAttribute(
-    "title",
-    `Go to game for ${prevGameDate.toLocaleDateString()}`
-  );
-
-  // following day
-  const nextGameDate = getGameDate();
-  const linkToNextDay = document.getElementById(ID_LINK_NEXT_DAY);
-  nextGameDate.setDate(nextGameDate.getDate() + 1);
-  if (nextGameDate.getTime() < Date.now()) {
-    const nextGameDateKey = getGameKey(nextGameDate);
-    linkToNextDay?.setAttribute("href", `#${nextGameDateKey}`);
-    linkToNextDay?.setAttribute(
-      "title",
-      `Go to game for ${nextGameDate.toLocaleDateString()}`
-    );
-  } else {
-    linkToNextDay?.setAttribute("href", "#");
-    linkToNextDay?.setAttribute("title", "Come back tomorrow for a new puzzle");
-  }
-
-  // init for current game date
+  initThemeControl(profile);
+  initDigitControl(profile);
   const gameDate = getGameDate();
   const gameKey = getGameKey(gameDate);
-  const currentDayLabel = document.getElementById(ID_CURRENT_DAY_TAG);
-  currentDayLabel?.setAttribute("href", `#${gameKey}`);
-  currentDayLabel?.setAttribute(
-    "title",
-    `Link to current game ${gameDate.toLocaleDateString()}`
-  );
+  initGameDayControl(gameDate, gameKey);
+
+  // ensure game stats for current game exists
   if (!profile.stats[gameKey]) {
     profile.stats[gameKey] = {
       guesses: [],
@@ -140,30 +67,37 @@ function initWith(profile) {
       solved: false,
     };
   }
+
+  // initialise constants
   const currentGame = profile.stats[gameKey];
   const numDigits = currentGame.guesses[0]?.length || profile.setting.digits;
   const numberForTheDay = getNumberForDate(numDigits, gameDate);
 
-  // update game state
   const gameKeyboard = document.getElementById(ID_SIMPLE_KEYBOARD);
   /** @type {string[]} */ const stagedGuess = [];
   const hasStagedGuess = () => stagedGuess.length;
   const stagedGuessIsComplete = () =>
     stagedGuess.length >= numberForTheDay.length;
+
+  // update game state when anything changes
   const update = () => {
-    const disabled = [...stagedGuess];
+    // disable any already included digit
+    const disabledKeys = [...stagedGuess];
+    // disabled backspace if current guess is empty
     if (!hasStagedGuess()) {
-      disabled.push(KEY_BKSPC);
+      disabledKeys.push(KEY_BKSPC);
     }
+    // disabled all numbers if guess is full otherwise disabled enter button
     if (stagedGuessIsComplete()) {
-      disabled.push(...ALLOWED_NUMBERS.map(String));
+      disabledKeys.push(...ALLOWED_NUMBERS.map(String));
     } else {
-      disabled.push(KEY_ENTER);
+      disabledKeys.push(KEY_ENTER);
     }
 
     const isOverGuessLimit = currentGame.guesses.length >= MAX_GUESS_COUNT;
     const lastGuessWasCorrect =
       currentGame.guesses.slice(-1)[0] === numberForTheDay;
+    // mark game as solved or failed
     if (isOverGuessLimit || lastGuessWasCorrect) {
       currentGame.inProgress = false;
       currentGame.solved = lastGuessWasCorrect;
@@ -172,15 +106,14 @@ function initWith(profile) {
       gameKeyboard && (gameKeyboard.ariaDisabled = "false");
     }
 
-    const currentGuess = stagedGuess.join("");
-    const previousGuesses = [...currentGame.guesses];
+    const guessesToRender = [...currentGame.guesses];
     if (!currentGame.inProgress && !lastGuessWasCorrect) {
       // reveal correct number
-      previousGuesses.push(numberForTheDay);
+      guessesToRender.push(numberForTheDay);
     }
 
-    renderKeyboard(stagedGuess, disabled);
-    renderGuesses(previousGuesses, numberForTheDay, currentGuess);
+    renderKeyboard(stagedGuess, disabledKeys);
+    renderGuesses(guessesToRender, numberForTheDay, stagedGuess.join(""));
     saveProfile(profile);
   };
 
@@ -203,6 +136,7 @@ function initWith(profile) {
     console.error("Game keyboard not initialised");
   }
 
+  // start up
   update();
 }
 
@@ -308,6 +242,101 @@ function getSeed(dateObj) {
 }
 
 /**
+ * @param {ReturnType<typeof loadProfile>} profile
+ */
+function initThemeControl(profile) {
+  // theme
+  const themes = ["light", "dark"];
+  const updateTheme = () =>
+    document.body.parentElement?.setAttribute(
+      "theme",
+      themes[Number(profile.setting.darkMode)]
+    );
+  themes.forEach((t) => {
+    document.getElementById(`btn-theme-${t}`)?.addEventListener("click", () => {
+      profile.setting.darkMode = !!themes.indexOf(t);
+      saveProfile(profile);
+      updateTheme();
+    });
+  });
+  updateTheme();
+}
+
+/**
+ * @param {ReturnType<typeof loadProfile>} profile
+ */
+function initDigitControl(profile) {
+  // digit count
+  const digitCountOptMin = 3,
+    digitCountOptMax = 7;
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-expect-error typescript can not handle it
+  /** @type {HTMLSelectElement} */ const optWrapper =
+    document.getElementById("opt-digits");
+  optWrapper && (optWrapper.innerHTML = "");
+  optWrapper?.addEventListener("change", () => {
+    const newValue = Number(optWrapper.value);
+    if (Number.isNaN(newValue)) return;
+    profile.setting.digits = Math.max(
+      Math.min(newValue, digitCountOptMax),
+      digitCountOptMin
+    );
+    saveProfile(profile);
+  });
+  new Array(digitCountOptMax - digitCountOptMin + 1)
+    .fill(null)
+    .forEach((_, i) => {
+      const value = digitCountOptMin + i;
+      const selectOpt = document.createElement("option");
+      selectOpt.selected = value === profile.setting.digits;
+      selectOpt.value = String(value);
+      selectOpt.innerText = selectOpt.value;
+      optWrapper?.appendChild(selectOpt);
+    });
+}
+
+/**
+ * @param {Date} gameDate
+ * @param {String} gameKey
+ */
+function initGameDayControl(gameDate, gameKey) {
+  // prev day
+  const prevGameDate = new Date(gameDate.getTime());
+  prevGameDate.setDate(prevGameDate.getDate() - 1);
+  const prevDayGameKey = getGameKey(prevGameDate);
+  const linkToPreviousDay = document.getElementById(ID_LINK_PREV_DAY);
+  linkToPreviousDay?.setAttribute("href", `#${prevDayGameKey}`);
+  linkToPreviousDay?.setAttribute(
+    "title",
+    `Go to game for ${prevGameDate.toLocaleDateString()}`
+  );
+
+  // next day
+  const nextGameDate = new Date(gameDate.getTime());
+  const linkToNextDay = document.getElementById(ID_LINK_NEXT_DAY);
+  nextGameDate.setDate(nextGameDate.getDate() + 1);
+  if (nextGameDate.getTime() < Date.now()) {
+    const nextGameDateKey = getGameKey(nextGameDate);
+    linkToNextDay?.setAttribute("href", `#${nextGameDateKey}`);
+    linkToNextDay?.setAttribute(
+      "title",
+      `Go to game for ${nextGameDate.toLocaleDateString()}`
+    );
+  } else {
+    linkToNextDay?.setAttribute("href", "#");
+    linkToNextDay?.setAttribute("title", "Come back tomorrow for a new puzzle");
+  }
+
+  // curr day
+  const currentDayLabel = document.getElementById(ID_CURRENT_DAY_TAG);
+  currentDayLabel?.setAttribute("href", `#${gameKey}`);
+  currentDayLabel?.setAttribute(
+    "title",
+    `Link to current game ${gameDate.toLocaleDateString()}`
+  );
+}
+
+/**
  * @param {string[]} [active]
  * @param {string[]} [disabled]
  */
@@ -349,7 +378,9 @@ function renderGuesses(guesses, actual, stagedGuess) {
         useStaged,
         guessesContainer.children.item(i)
       );
-      guessWrapper.ariaHidden = String(i > guesses.length || (i === guesses.length && isSolved));
+      guessWrapper.ariaHidden = String(
+        i > guesses.length || (i === guesses.length && isSolved)
+      );
       return guessWrapper;
     })
     .forEach((c) => moveChildInto(guessesContainer, c));
@@ -407,7 +438,7 @@ function renderGuessEntry(guess, actual, isStaged, recycle) {
   Array.from(digitWrappers)
     .slice(actual.length)
     .forEach((w) => {
-      guessDivWrapper.removeChild(w)
+      guessDivWrapper.removeChild(w);
     });
   injuredCount -= deadCount;
 
