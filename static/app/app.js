@@ -6,7 +6,13 @@ const ID_LINK_NEXT_DAY = "link-next-day";
 const ID_CURRENT_DAY_TAG = "current-day";
 const KEY_BKSPC = "Backspace";
 const KEY_ENTER = "Enter";
-const ALLOWED_NUMBERS = new Array(10).fill("").map((_, i) => i);
+/**
+ * @param {number} to
+ * @param {number} [from]
+ */
+const range = (to, from = 0) =>
+  new Array(to - from + 1).fill(null).map((_, i) => from + i);
+const ALLOWED_NUMBERS = range(9);
 const GAME_KEYBOARD = [
   ALLOWED_NUMBERS.slice(0, Math.ceil(ALLOWED_NUMBERS.length / 2)),
   ALLOWED_NUMBERS.slice(-Math.floor(ALLOWED_NUMBERS.length / 2)),
@@ -226,7 +232,7 @@ function getGameKey(dateObj) {
  * @param {Date} dateObj
  */
 function getNumberForDate(numDigits, dateObj) {
-  const digitPool = new Array(10).fill(null).map((_, i) => i);
+  const digitPool = [...ALLOWED_NUMBERS];
   const selectFrom = `${Math.sin(getSeed(dateObj)) * Math.pow(10, 16)}`
     .split("")
     .map(Number);
@@ -301,16 +307,13 @@ function initDigitControl(profile) {
     );
     saveProfile(profile);
   });
-  new Array(digitCountOptMax - digitCountOptMin + 1)
-    .fill(null)
-    .forEach((_, i) => {
-      const value = digitCountOptMin + i;
-      const selectOpt = document.createElement("option");
-      selectOpt.selected = value === profile.setting.digits;
-      selectOpt.value = String(value);
-      selectOpt.innerText = selectOpt.value;
-      optWrapper?.appendChild(selectOpt);
-    });
+  range(digitCountOptMax, digitCountOptMin).forEach((value) => {
+    const selectOpt = document.createElement("option");
+    selectOpt.selected = value === profile.setting.digits;
+    selectOpt.value = String(value);
+    selectOpt.innerText = selectOpt.value;
+    optWrapper?.appendChild(selectOpt);
+  });
 }
 
 /**
@@ -514,12 +517,11 @@ function renderGuesses(guesses, actual, stagedGuess) {
 
   const isSolved = guesses.slice(-1)[0] === actual;
 
-  new Array(MAX_GUESS_COUNT + 1)
-    .fill("")
-    .map((g, i) => {
+  range(MAX_GUESS_COUNT)
+    .map((i) => {
       const useStaged = i === guesses.length;
       const guessWrapper = renderGuessEntry(
-        guesses[i] ?? (useStaged ? stagedGuess : g),
+        guesses[i] ?? (useStaged ? stagedGuess : ""),
         actual,
         useStaged,
         guessesContainer.children.item(i)
@@ -564,14 +566,10 @@ function renderGuessEntry(guess, actual, isStaged, recycle) {
   injuredCountWrapper.setAttribute("tab-index", `${guessTabIndex}`);
   moveChildInto(guessDivWrapper, injuredCountWrapper);
 
-  let deadCount = 0;
-  let injuredCount = 0;
   const digitWrappers = guessDivWrapper.getElementsByClassName(CLS_GUESS_DIGIT);
   actual
     .split("")
-    .map((n, i) => {
-      if (n === guess[i]) deadCount += 1;
-      if (guess.includes(n)) injuredCount += 1;
+    .map((_, i) => {
       const digitWrapper =
         digitWrappers.item(i) ?? document.createElement("span");
       digitWrapper.className = CLS_GUESS_DIGIT;
@@ -586,7 +584,7 @@ function renderGuessEntry(guess, actual, isStaged, recycle) {
     .forEach((w) => {
       guessDivWrapper.removeChild(w);
     });
-  injuredCount -= deadCount;
+  const [deadCount, injuredCount] = countDeadAndInjured(actual, guess);
 
   if (guess && !isStaged) {
     guessDivWrapper.ariaDisabled = "true";
@@ -606,6 +604,22 @@ function renderGuessEntry(guess, actual, isStaged, recycle) {
   }
 
   return guessDivWrapper;
+}
+
+/**
+ * @param {string} actual
+ * @param {string} guess
+ * @returns {readonly [number, number]}
+ */
+function countDeadAndInjured(actual, guess) {
+  let deadCount = 0;
+  let injuredCount = 0;
+  actual.split("").map((n, i) => {
+    if (n === guess[i]) deadCount += 1;
+    if (guess.includes(n)) injuredCount += 1;
+  });
+  injuredCount -= deadCount;
+  return Object.freeze([deadCount, injuredCount]);
 }
 
 /**
