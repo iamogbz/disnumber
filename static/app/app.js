@@ -93,6 +93,7 @@ function initWith(profile) {
 
   // update game state when anything changes
   const update = () => {
+    const currentGuess = stagedGuess.join("");
     // disable any already included digit
     const disabledKeys = [...stagedGuess];
     // disabled backspace if current guess is empty
@@ -104,17 +105,14 @@ function initWith(profile) {
       disabledKeys.push(...ALLOWED_NUMBERS.map(String));
     } else {
       disabledKeys.push(KEY_ENTER);
-      // disable any keys that lead to wrong guesses
-      if (profile.setting.hints.disableImpossible) {
-        const suggestions = getSuggestion(numberForTheDay, currentGame.guesses);
-        const validDigitsAtPosition = suggestions[stagedGuess.length];
-        console.log(validDigitsAtPosition);
-        const invalidDigits = ALLOWED_NUMBERS.filter(
-          (n) => !validDigitsAtPosition.has(n)
-        );
-        disabledKeys.push(...invalidDigits.map(String));
-      }
     }
+    // highlight keys leading to correct guesses
+    const activeKeys = profile.setting.hints.enableBestGuesses
+      ? Array.from(
+          getSuggestion(numberForTheDay, currentGame.guesses, currentGuess)
+        ).map(String)
+      : [];
+    activeKeys.push(...stagedGuess);
 
     const isOverGuessLimit = currentGame.guesses.length >= MAX_GUESS_COUNT;
     const lastGuessWasCorrect =
@@ -142,8 +140,8 @@ function initWith(profile) {
       guessesToRender.push(numberForTheDay);
     }
 
-    renderKeyboard(stagedGuess, disabledKeys);
-    renderGuesses(guessesToRender, numberForTheDay, stagedGuess.join(""));
+    renderKeyboard(activeKeys, disabledKeys);
+    renderGuesses(guessesToRender, numberForTheDay, currentGuess);
     renderStatistics(profile);
     saveProfile(profile);
   };
@@ -276,9 +274,9 @@ function getSeed(dateObj) {
  * Returns an array with each index being the possible numbers at the position
  * @param {string} actualNumber
  * @param {string[]} submittedGuesses
- * @returns {readonly (readonly Set<number>)[]}
+ * @param {string} stagedGuess
  */
-function getSuggestion(actualNumber, submittedGuesses) {
+function getSuggestion(actualNumber, submittedGuesses, stagedGuess) {
   const isValid = (/** @type {string} */ guess) =>
     new Set(guess).size === guess.length;
   const isPossible = (/** @type {string} */ guess) => {
@@ -302,7 +300,6 @@ function getSuggestion(actualNumber, submittedGuesses) {
     return true;
   };
 
-  const suggestions = range(actualNumber.length - 1).map(() => new Set());
   const possible = range(
     Math.pow(10, actualNumber.length) - 1,
     Math.pow(10, Math.max(actualNumber.length - 2, 0))
@@ -311,16 +308,11 @@ function getSuggestion(actualNumber, submittedGuesses) {
     .map((g) => `${g.length < actualNumber.length ? 0 : ""}${g}`)
     .filter(isPossible);
 
-  possible.forEach((possibleGuess) => {
-    possibleGuess
-      .split("")
-      .map(Number)
-      .forEach((n, i) => {
-        suggestions[i].add(n);
-      });
-  });
-
-  return suggestions;
+  return new Set(
+    possible
+      .filter((p) => p.startsWith(stagedGuess))
+      .map((p) => Number(p.charAt(stagedGuess.length)))
+  );
 }
 
 /**
