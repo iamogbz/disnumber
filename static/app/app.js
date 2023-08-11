@@ -104,6 +104,16 @@ function initWith(profile) {
       disabledKeys.push(...ALLOWED_NUMBERS.map(String));
     } else {
       disabledKeys.push(KEY_ENTER);
+      // disable any keys that lead to wrong guesses
+      if (profile.setting.hints.disableImpossible) {
+        const suggestions = getSuggestion(numberForTheDay, currentGame.guesses);
+        const validDigitsAtPosition = suggestions[stagedGuess.length];
+        console.log(validDigitsAtPosition);
+        const invalidDigits = ALLOWED_NUMBERS.filter(
+          (n) => !validDigitsAtPosition.has(n)
+        );
+        disabledKeys.push(...invalidDigits.map(String));
+      }
     }
 
     const isOverGuessLimit = currentGame.guesses.length >= MAX_GUESS_COUNT;
@@ -260,6 +270,57 @@ function getSeed(dateObj) {
     dateObj.getUTCMonth() * maxMonthDayCount +
     dateObj.getUTCDate()
   );
+}
+
+/**
+ * Returns an array with each index being the possible numbers at the position
+ * @param {string} actualNumber
+ * @param {string[]} submittedGuesses
+ * @returns {readonly (readonly Set<number>)[]}
+ */
+function getSuggestion(actualNumber, submittedGuesses) {
+  const isValid = (/** @type {string} */ guess) =>
+    new Set(guess).size === guess.length;
+  const isPossible = (/** @type {string} */ guess) => {
+    if (!isValid(guess)) return false;
+    for (const prevGuess of submittedGuesses) {
+      const [countExpectedDead, countExpectedInjured] = countDeadAndInjured(
+        actualNumber,
+        prevGuess
+      );
+      const [countGuessedDead, countGuessedInjured] = countDeadAndInjured(
+        guess,
+        prevGuess
+      );
+      if (
+        countExpectedDead !== countGuessedDead ||
+        countExpectedInjured !== countGuessedInjured
+      ) {
+        return false;
+      }
+    }
+    return true;
+  };
+
+  const suggestions = range(actualNumber.length - 1).map(() => new Set());
+  const possible = range(
+    Math.pow(10, actualNumber.length) - 1,
+    Math.pow(10, Math.max(actualNumber.length - 2, 0))
+  )
+    .map(String)
+    .map((g) => `${g.length < actualNumber.length ? 0 : ""}${g}`)
+    .filter(isPossible);
+
+  possible.forEach((possibleGuess) => {
+    possibleGuess
+      .split("")
+      .map(Number)
+      .forEach((n, i) => {
+        suggestions[i].add(n);
+      });
+  });
+
+  return suggestions;
 }
 
 /**
