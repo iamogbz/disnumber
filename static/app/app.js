@@ -104,6 +104,14 @@ function initWith(profile) {
       currentGame.guesses.slice(-1)[0] === numberForTheDay;
     // mark game as solved or failed
     if (isOverGuessLimit || lastGuessWasCorrect) {
+      if (currentGame.inProgress && lastGuessWasCorrect) {
+        // show stats dialog for just solved game
+        setTimeout(() => {
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // @ts-expect-error
+          document.getElementById("dialogStats")?.showModal?.();
+        }, 300);
+      }
       currentGame.inProgress = false;
       currentGame.solved = lastGuessWasCorrect;
       gameKeyboard && (gameKeyboard.ariaDisabled = "true");
@@ -259,12 +267,14 @@ function initThemeControl(profile) {
       themes[Number(profile.setting.darkMode)]
     );
   themes.forEach((t) => {
-    document.getElementById(`btn-theme-${t}`)?.addEventListener("click", (e) => {
-      e.preventDefault();
-      profile.setting.darkMode = !!themes.indexOf(t);
-      saveProfile(profile);
-      updateTheme();
-    });
+    document
+      .getElementById(`btn-theme-${t}`)
+      ?.addEventListener("click", (e) => {
+        e.preventDefault();
+        profile.setting.darkMode = !!themes.indexOf(t);
+        saveProfile(profile);
+        updateTheme();
+      });
   });
   updateTheme();
 }
