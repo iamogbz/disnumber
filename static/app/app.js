@@ -44,8 +44,8 @@ const EMPTY_PROFILE = Object.freeze({
     darkMode: false,
     digits: 4,
     hints: {
-      disableImpossible: false,
-      enableBestGuesses: false,
+      disableImpossible: true,
+      enableBestGuesses: true,
     },
   },
   stats: {},
@@ -462,14 +462,16 @@ function renderKeyboard(active, disabled, inProgress) {
   );
   // highlight guide digits
   if ((active?.length ?? 0) < ALLOWED_NUMBERS.length) {
-    active?.forEach((k) => {
-      simpleKeyboard?.shadowRoot
-        ?.querySelector(`[data-key="${k}"]:not([aria-disabled])`)
-        ?.setAttribute(
-          "style",
-          "box-shadow: inset var(--color-injured) 0 0 0.2em 0"
-        );
-    });
+    setTimeout(() => {
+      active?.forEach((k) => {
+        simpleKeyboard?.shadowRoot
+          ?.querySelector(`[data-key="${k}"]:not([aria-disabled])`)
+          ?.setAttribute(
+            "style",
+            "box-shadow: inset var(--color-injured) 0 0 0 0.1em"
+          );
+      });
+    }, 150);
   }
   simpleKeyboard?.setAttribute("aria-disabled", String(Boolean(!inProgress)));
 }
