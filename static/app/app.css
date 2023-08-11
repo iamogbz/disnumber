@@ -4,23 +4,21 @@ html {
   --color-dead: red;
   --color-injured: orange;
 
-  &[theme="dark"] {
-    --color-bg: #222;
-    --color-fg: #eee;
-
-    #btn-theme-dark {
-      pointer-events: none;
-    }
-  }
-
-  &[theme="light"] {
-    #btn-theme-light {
-      pointer-events: none;
-    }
-  }
-
   --level-btm: -1;
   --level-top: 1;
+}
+
+html[theme="dark"] {
+  --color-bg: #222;
+  --color-fg: #eee;
+}
+
+html[theme="dark"] #btn-theme-dark {
+  pointer-events: none;
+}
+
+html[theme="light"] #btn-theme-light {
+  pointer-events: none;
 }
 
 * {
@@ -95,30 +93,30 @@ header {
   top: 0;
   user-select: none;
   z-index: var(--level-top);
+}
 
-  & nav {
-    display: flex;
-    flex-direction: row;
-    font-size: 2em;
-    padding: 0 0.4em;
-    position: absolute;
+header nav {
+  display: flex;
+  flex-direction: row;
+  font-size: 2em;
+  padding: 0 0.4em;
+  position: absolute;
+}
 
-    & a[href="#"] {
-      opacity: 0.5;
-    }
-  }
+header nav a[href="#"] {
+  opacity: 0.5;
+}
 
-  & #game-date-nav {
-    left: 0;
-  }
+header #game-date-nav {
+  left: 0;
+}
 
-  & #configure-nav {
-    right: 0;
-  }
+header #configure-nav {
+  right: 0;
+}
 
-  & a {
-    opacity: 1;
-  }
+header a {
+  opacity: 1;
 }
 
 main {
@@ -130,15 +128,15 @@ main {
   margin: 0 auto;
   padding: 1em;
   user-select: none;
+}
 
-  #guesses {
-    align-items: center;
-    display: flex;
-    flex-direction: column;
-    gap: 0.2em;
-    justify-content: center;
-    position: relative;
-  }
+main #guesses {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2em;
+  justify-content: center;
+  position: relative;
 }
 
 .guess-entry {
@@ -149,113 +147,110 @@ main {
   padding: 0 0.2em;
   position: relative;
   z-index: 0;
+}
 
-  & span {
-    align-items: center;
-    border-color: initial;
-    border-radius: 0.1em;
-    border-style: solid;
-    border-width: 0.1em;
-    display: flex;
-    height: 1em;
-    justify-content: center;
-    opacity: 1;
-    padding: 0.4em;
-    visibility: visible;
-    width: 1em;
-  }
+.guess-entry span {
+  align-items: center;
+  border-color: initial;
+  border-radius: 0.1em;
+  border-style: solid;
+  border-width: 0.1em;
+  display: flex;
+  height: 1em;
+  justify-content: center;
+  opacity: 1;
+  padding: 0.4em;
+  visibility: visible;
+  width: 1em;
+}
 
-  &[aria-hidden="true"] {
-    margin-top: -2em;
-    z-index: var(--level-btm);
+.guess-entry[hidden="true"] {
+  margin-top: -2em;
+  z-index: var(--level-btm);
+}
 
-    & span {
-      /* border-width: 0em; */
-      opacity: 0;
-      /* padding: 0em; */
-      /* visibility: hidden; */
-    }
-  }
+.guess-entry[hidden="true"] span {
+  /* border-width: 0em; */
+  opacity: 0;
+  /* padding: 0em; */
+  /* visibility: hidden; */
+}
 
-  &[aria-disabled="true"] {
-    & .guess-digit {
-      background-color: color-mix(in srgb, var(--color-fg) 14%, transparent);
-      border-color: transparent;
-    }
-  }
+.guess-entry[disabled="true"] .guess-digit {
+  background-color: color-mix(in srgb, var(--color-fg) 14%, transparent);
+  border-color: transparent;
+}
 
-  &.guess-correct .guess-digit {
-    border-image: linear-gradient(
-        to bottom right,
-        var(--color-dead),
-        var(--color-injured)
-      )
-      1;
-  }
+.guess-entry.guess-correct .guess-digit {
+  border-image: linear-gradient(
+      to bottom right,
+      var(--color-dead),
+      var(--color-injured)
+    )
+    1;
+}
 
-  .guess-digit {
-    background-color: color-mix(in srgb, var(--color-bg) 100%, transparent);
-    position: relative;
-    transform: scale(1);
+.guess-entry .guess-digit {
+  background-color: color-mix(in srgb, var(--color-bg) 100%, transparent);
+  position: relative;
+  transform: scale(1);
+}
 
-    &[filled="false"] {
-      transform: scale(0.9);
-    }
-  }
+.guess-entry .guess-digit[filled="false"] {
+  transform: scale(0.9);
+}
 
-  .guess-dead,
-  .guess-injured {
-    font-weight: 900;
-    opacity: 0;
-    position: absolute;
-    width: 0em;
-  }
+.guess-entry .guess-dead,
+.guess-entry .guess-injured {
+  font-weight: 900;
+  opacity: 0;
+  position: absolute;
+  width: 0em;
+}
 
-  .guess-dead {
-    color: var(--color-dead);
-    right: calc(100% - 2em);
-  }
-  .guess-injured {
-    color: var(--color-injured);
-    left: calc(100% - 2em);
-  }
+.guess-entry .guess-dead {
+  color: var(--color-dead);
+  right: calc(100% - 2em);
+}
 
-  &[aria-disabled="true"]:not(.guess-correct) {
-    .guess-dead,
-    .guess-injured {
-      opacity: 1;
-      width: 1em;
-    }
-    .guess-dead {
-      right: 100%;
-    }
-    .guess-injured {
-      left: 100%;
-    }
-  }
+.guess-entry .guess-injured {
+  color: var(--color-injured);
+  left: calc(100% - 2em);
+}
+
+.guess-entry[disabled="true"]:not(.guess-correct) .guess-dead,
+.guess-entry[disabled="true"]:not(.guess-correct) .guess-injured {
+  opacity: 1;
+  width: 1em;
+}
+.guess-entry[disabled="true"]:not(.guess-correct) .guess-dead {
+  right: 100%;
+}
+.guess-entry[disabled="true"]:not(.guess-correct) .guess-injured {
+  left: 100%;
 }
 
 .example-entry {
   display: flex;
   flex-direction: column;
+}
 
-  & .guess-entry {
-    margin: 1em 2em;
-    width: fit-content;
-  }
+.example-entry .guess-entry {
+  margin: 1em 2em;
+  width: fit-content;
+}
 
-  & code {
-    font-size: 1.4em;
-    font-weight: 900;
-  }
+.example-entry code {
+  font-size: 1.4em;
+  font-weight: 900;
 }
 
 dialog {
   border-radius: 0.6em;
+}
 
-  & form {
-    margin: 0;
-  }
+dialog form {
+  margin: 0;
 }
 
 #dialogConfig > form > .config-opt {
@@ -264,68 +259,69 @@ dialog {
   gap: 1em;
   justify-content: space-between;
   margin: 0.5em 0;
+}
 
-  & .opt-desc {
-    flex-grow: 1;
-  }
+#dialogConfig > form > .config-opt .opt-desc {
+  flex-grow: 1;
+}
 
-  & .opt-ctrl {
-    align-items: center;
-    display: flex;
-    width: fit-content;
-    gap: 0.4em;
-    justify-content: end;
-    width: 100px;
-  }
+#dialogConfig > form > .config-opt .opt-ctrl {
+  align-items: center;
+  display: flex;
+  width: fit-content;
+  gap: 0.4em;
+  justify-content: end;
+  width: 100px;
+}
 
-  #opt-digits {
-    padding: 0.5em 1em;
-  }
+#dialogConfig #opt-digits {
+  padding: 0.5em 1em;
 }
 
 #dialogStats > form {
   user-select: none;
+}
 
-  #stat-summary {
-    display: flex;
-    justify-content: space-between;
+#dialogStats #stat-summary {
+  display: flex;
+  justify-content: space-between;
+}
 
-    .stat-tile {
-      & span {
-        font-size: 0.8em;
-      }
-    }
-  }
+#dialogStats #stat-summary .stat-tile span {
+  font-size: 0.8em;
+}
 
-  #stat-summary,
-  #stat-details,
-  #stat-unsolved {
-    margin: 0.5em 0 1em;
-  }
+#dialogStats #stat-summary,
+#dialogStats #stat-details,
+#dialogStats #stat-unsolved {
+  margin: 0.5em 0 1em;
+}
 
-  .stats-details-group,
-  .stats-details-line {
-    margin: 0.5em 0;
-  }
+#dialogStats .stats-details-group,
+#dialogStats .stats-details-line {
+  margin: 0.5em 0;
+}
 
-  .stats-details-group,
-  .stats-details-line {
-    font-size: 0.8em;
-    font-weight: 600;
-  }
-  .stats-details-group summary {
-    cursor: pointer;
-  }
-  .stats-details-line {
-    display: flex;
-    gap: 0.5em;
-  }
-  .stats-dist-line-bar {
-    background: color-mix(in srgb, var(--color-bg) 80%, var(--color-fg));
-    direction: rtl;
-    display: inline-block;
-    text-indent: 1em;
-  }
+#dialogStats .stats-details-group,
+#dialogStats .stats-details-line {
+  font-size: 0.8em;
+  font-weight: 600;
+}
+
+#dialogStats .stats-details-group summary {
+  cursor: pointer;
+}
+
+#dialogStats .stats-details-line {
+  display: flex;
+  gap: 0.5em;
+}
+
+#dialogStats .stats-dist-line-bar {
+  background: color-mix(in srgb, var(--color-bg) 80%, var(--color-fg));
+  direction: rtl;
+  display: inline-block;
+  text-indent: 1em;
 }
 
 footer {
@@ -342,32 +338,30 @@ footer {
   /* position: sticky;
   width: 100%;
   z-index: var(--level-top); */
+}
 
-  & simple-keyboard {
-    background-color: var(--color-bg);
-    border-radius: 0.6em;
-    border-style: solid;
-    border-width: 0.1em;
-    font-size: 2em;
-    padding: 0.5em;
-  }
+footer simple-keyboard {
+  background-color: var(--color-bg);
+  border-radius: 0.6em;
+  border-style: solid;
+  border-width: 0.1em;
+  font-size: 2em;
+  padding: 0.5em;
 }
 
 /** Mobile */
 @media (max-width: 640px) {
-  header {
-    & h1 {
-      margin-left: -1em;
-    }
+  header h1 {
+    margin-left: -1em;
+  }
 
-    & nav {
-      font-size: 1em;
-      padding: 0 0.2em;
+  header nav {
+    font-size: 1em;
+    padding: 0 0.2em;
+  }
 
-      & #current-day {
-        display: none;
-      }
-    }
+  header nav #current-day {
+    display: none;
   }
 
   main {

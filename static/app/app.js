@@ -129,9 +129,9 @@ function initWith(profile) {
       }
       currentGame.inProgress = false;
       currentGame.solved = lastGuessWasCorrect;
-      gameKeyboard && (gameKeyboard.ariaDisabled = "true");
+      gameKeyboard?.setAttribute("disabled", "true");
     } else {
-      gameKeyboard && (gameKeyboard.ariaDisabled = "false");
+      gameKeyboard?.setAttribute("disabled", "false");
     }
 
     const guessesToRender = [...currentGame.guesses];
@@ -459,7 +459,7 @@ function renderKeyboard(active, disabled) {
   if ((active?.length ?? 0) < ALLOWED_NUMBERS.length) {
     active?.forEach((k) => {
       simpleKeyboard?.shadowRoot
-        ?.querySelector(`[data-key="${k}"]:not([aria-disabled])`)
+        ?.querySelector(`[data-key="${k}"]:not([disabled])`)
         ?.setAttribute(
           "style",
           "box-shadow: inset var(--color-injured) 0 0 0.2em 0"
@@ -590,8 +590,9 @@ function renderGuesses(guesses, actual, stagedGuess) {
         useStaged,
         guessesContainer.children.item(i)
       );
-      guessWrapper.ariaHidden = String(
-        i > guesses.length || (i === guesses.length && isSolved)
+      guessWrapper.setAttribute(
+        "hidden",
+        String(i > guesses.length || (i === guesses.length && isSolved))
       );
       return guessWrapper;
     })
@@ -651,7 +652,7 @@ function renderGuessEntry(guess, actual, isStaged, recycle) {
   const [deadCount, injuredCount] = countDeadAndInjured(actual, guess);
 
   if (guess && !isStaged) {
-    guessDivWrapper.ariaDisabled = "true";
+    guessDivWrapper.setAttribute("disabled", "true");
     guessDivWrapper.setAttribute("tab-index", `${guessTabIndex}`);
 
     if (deadCount < actual.length) {
@@ -664,7 +665,7 @@ function renderGuessEntry(guess, actual, isStaged, recycle) {
       guessDivWrapper.classList.add(CLS_GUESS_ENTRY_SOLVED);
     }
   } else {
-    guessDivWrapper.ariaDisabled = "false";
+    guessDivWrapper.setAttribute("disabled", "false");
   }
 
   return guessDivWrapper;
