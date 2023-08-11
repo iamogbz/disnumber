@@ -694,3 +694,10 @@ function moveChildInto(parentElement, childElement) {
   if (childElement.parentElement === parentElement) return;
   parentElement.appendChild(childElement);
 }
+
+// register pwa
+window.addEventListener("load", () => {
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("service-worker.js");
+  }
+});
