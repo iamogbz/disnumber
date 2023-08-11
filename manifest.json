@@ -2,9 +2,9 @@
   "background_color": "#ffffff",
   "theme_color": "#333333",
   "name": "Disnumber",
-  "short_name": "dai",
+  "short_name": "Disnumber",
   "display": "standalone",
-  "start_url": "/",
+  "start_url": "/dai-pwa",
   "icons": [
     {
       "src": "https://raw.githubusercontent.com/iamogbz/dai-pwa/main/static/assets/images/logo-192.png",
