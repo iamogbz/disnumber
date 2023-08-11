@@ -6,7 +6,7 @@ const ID_LINK_NEXT_DAY = "link-next-day";
 const ID_CURRENT_DAY_TAG = "current-day";
 const KEY_BKSPC = "Backspace";
 const KEY_ENTER = "Enter";
-const ALLOWED_NUMBERS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 0];
+const ALLOWED_NUMBERS = new Array(10).fill("").map((_, i) => i);
 const GAME_KEYBOARD = [
   ALLOWED_NUMBERS.slice(0, Math.ceil(ALLOWED_NUMBERS.length / 2)),
   ALLOWED_NUMBERS.slice(-Math.floor(ALLOWED_NUMBERS.length / 2)),
@@ -38,8 +38,8 @@ const EMPTY_PROFILE = Object.freeze({
     darkMode: false,
     digits: 4,
     hints: {
-      disableImpossible: false, // TODO: add to settings dialog
-      enableBestGuesses: false, // TODO: add to settings dialog
+      disableImpossible: false,
+      enableBestGuesses: false,
     },
   },
   stats: {},
@@ -58,6 +58,7 @@ function initWith(profile) {
   // controls
   initThemeControl(profile);
   initDigitControl(profile);
+  initHintControl(profile);
   const gameDate = getGameDate();
   const gameKey = getGameKey(gameDate);
   initGameDayControl(gameDate, gameKey);
@@ -310,6 +311,32 @@ function initDigitControl(profile) {
       selectOpt.innerText = selectOpt.value;
       optWrapper?.appendChild(selectOpt);
     });
+}
+
+/**
+ * @param {ReturnType<typeof loadProfile>} profile
+ */
+function initHintControl(profile) {
+  const toggleButton = document.getElementById("btn-hint-toggle");
+  const setEnabled = (/** @type {boolean} */ enabled) => {
+    profile.setting.hints.disableImpossible = enabled;
+    profile.setting.hints.enableBestGuesses = enabled;
+  };
+  const isEnabled = () =>
+    profile.setting.hints.disableImpossible &&
+    profile.setting.hints.enableBestGuesses;
+  const updateControlToggle = () =>
+    toggleButton &&
+    (toggleButton.innerText = isEnabled() ? "Disable" : "Enable");
+
+  toggleButton?.addEventListener("click", (e) => {
+    e.preventDefault();
+    setEnabled(!isEnabled());
+    saveProfile(profile);
+    updateControlToggle();
+  });
+
+  updateControlToggle();
 }
 
 /**
