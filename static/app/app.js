@@ -17,6 +17,9 @@ const CLS_GUESS_ENTRY_SOLVED = "guess-correct";
 const CLS_GUESS_DIGIT = "guess-digit";
 const CLS_GUESS_COUNT_DEAD = "guess-dead";
 const CLS_GUESS_COUNT_INJURED = "guess-injured";
+const CLS_STATS_DETAILS_GROUP = "stats-details-group";
+const CLS_STATS_DETAILS_LINE = "stats-details-line";
+const CLS_STATS_DIST_LINE_BAR = "stats-dist-line-bar";
 const MAX_GUESS_COUNT = 9;
 const MAX_DIGIT_COUNT = 10;
 /** @type {{
@@ -58,6 +61,8 @@ function initWith(profile) {
   const gameDate = getGameDate();
   const gameKey = getGameKey(gameDate);
   initGameDayControl(gameDate, gameKey);
+
+  renderStatistics(profile);
 
   // ensure game stats for current game exists
   if (!profile.stats[gameKey]) {
@@ -114,6 +119,7 @@ function initWith(profile) {
 
     renderKeyboard(stagedGuess, disabledKeys);
     renderGuesses(guessesToRender, numberForTheDay, stagedGuess.join(""));
+    renderStatistics(profile);
     saveProfile(profile);
   };
 
@@ -355,6 +361,108 @@ function renderKeyboard(active, disabled) {
     "keys-disabled",
     window.btoa(JSON.stringify(disabled ?? []))
   );
+}
+
+/**
+ * @param {ReturnType<typeof loadProfile>} profile
+ */
+function renderStatistics(profile) {
+  // statistics
+  const playedGames = Object.entries(profile.stats).filter(
+    ([, v]) => v.guesses.length
+  );
+  /** @type {typeof playedGames} */ const finishedGames = [];
+  /** @type {Record<string, string[]>} */ const finishedGamesByLength = {};
+  /** @type {Record<string, string[]>} */ const unfinishedGamesByLength = {};
+
+  playedGames.forEach(([gameDateKey, gameState]) => {
+    const digitCount = gameState.guesses[0].length;
+    let _gamesByLength = unfinishedGamesByLength;
+    if (gameState.solved) {
+      finishedGames.push([gameDateKey, gameState]);
+      _gamesByLength = finishedGamesByLength;
+    }
+    if (!_gamesByLength[digitCount]) {
+      _gamesByLength[digitCount] = [];
+    }
+    _gamesByLength[digitCount].push(gameDateKey);
+  });
+
+  // set the summary tiles
+  const playCountWrapper = document.getElementById("stat-play-count");
+  playCountWrapper && (playCountWrapper.innerText = `${finishedGames.length}`);
+  const statSolveWrapper = document.getElementById("stat-solve-percent");
+  const statSolvePercent = playedGames.length
+    ? Math.round((100 * finishedGames.length) / playedGames.length)
+    : 0;
+  statSolveWrapper && (statSolveWrapper.innerText = `${statSolvePercent}`);
+
+  // set the stat details
+  const statDetailsWrapper = document.getElementById("stat-details");
+  statDetailsWrapper && (statDetailsWrapper.innerHTML = "");
+  Object.entries(finishedGamesByLength).forEach(
+    ([puzzleLength, puzzleGameKeys]) => {
+      const detailsElement = document.createElement("details");
+      detailsElement.className = CLS_STATS_DETAILS_GROUP;
+      const summaryElement = document.createElement("summary");
+      summaryElement.innerText = `Puzzle length ${puzzleLength}`;
+      detailsElement.appendChild(summaryElement);
+      /** @type {Record<number, number>} */ const solveFreqByGuessCount = {};
+      puzzleGameKeys.forEach((key) => {
+        const solveGuessCount = profile.stats[key].guesses.length;
+        solveFreqByGuessCount[solveGuessCount] =
+          (solveFreqByGuessCount[solveGuessCount] ?? 0) + 1;
+      });
+      const distributionWrapper = document.createElement("div");
+      const mostFrequentBucket = Math.max(
+        ...Object.values(solveFreqByGuessCount)
+      );
+      Object.keys(solveFreqByGuessCount)
+        .map(Number)
+        .sort()
+        .forEach((guessCount) => {
+          const distributionLine = document.createElement("div");
+          distributionLine.className = CLS_STATS_DETAILS_LINE;
+          const solveCount = solveFreqByGuessCount[guessCount];
+          const percentWidth = Math.round(
+            (100 * solveCount) / mostFrequentBucket
+          );
+          distributionLine.innerHTML = `<span>${guessCount}</span>
+          <span class="${CLS_STATS_DIST_LINE_BAR}" style="width: calc(${percentWidth}%)">${solveCount}</span>`;
+          distributionWrapper.appendChild(distributionLine);
+        });
+      detailsElement.appendChild(distributionWrapper);
+      statDetailsWrapper?.appendChild(detailsElement);
+    }
+  );
+  if (!statDetailsWrapper?.innerHTML) {
+    statDetailsWrapper?.appendChild(new Text("No solved games"));
+  }
+
+  // set the unfinished game links
+  const statUnsolvedWrapper = document.getElementById("stat-unsolved");
+  statUnsolvedWrapper && (statUnsolvedWrapper.innerHTML = "");
+  Object.entries(unfinishedGamesByLength).forEach(
+    ([puzzleLength, puzzleGameKeys]) => {
+      const detailsElement = document.createElement("details");
+      detailsElement.className = CLS_STATS_DETAILS_GROUP;
+      const summaryElement = document.createElement("summary");
+      summaryElement.innerText = `Puzzle length ${puzzleLength}`;
+      detailsElement.appendChild(summaryElement);
+      const linksWrapper = document.createElement("div");
+      puzzleGameKeys.sort().forEach((key) => {
+        const link = document.createElement("a");
+        link.href = `#${key}`;
+        link.innerText = `${key}: ${profile.stats[key].guesses.length} attempts`;
+        linksWrapper.appendChild(link);
+      });
+      detailsElement.appendChild(linksWrapper);
+      statUnsolvedWrapper?.appendChild(detailsElement);
+    }
+  );
+  if (!statUnsolvedWrapper?.innerHTML) {
+    statUnsolvedWrapper?.appendChild(new Text("No unsolved games"));
+  }
 }
 
 /**

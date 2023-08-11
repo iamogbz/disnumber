@@ -265,6 +265,51 @@ dialog {
   }
 }
 
+#dialogStats > form {
+  user-select: none;
+
+  #stat-summary {
+    display: flex;
+    justify-content: space-between;
+
+    .stat-tile {
+      & span {
+        font-size: 0.8em;
+      }
+    }
+  }
+
+  #stat-summary,
+  #stat-details,
+  #stat-unsolved {
+    margin: 0.5em 0 1em;
+  }
+
+  .stats-details-group,
+  .stats-details-line {
+    margin: 0.5em 0;
+  }
+
+  .stats-details-group,
+  .stats-details-line {
+    font-size: 0.8em;
+    font-weight: 600;
+  }
+  .stats-details-group summary {
+    cursor: pointer;
+  }
+  .stats-details-line {
+    display: flex;
+    gap: 0.5em;
+  }
+  .stats-dist-line-bar {
+    background: color-mix(in srgb, var(--color-bg) 80%, var(--color-fg));
+    direction: rtl;
+    display: inline-block;
+    text-indent: 1em;
+  }
+}
+
 footer {
   align-items: center;
   background-color: var(--color-bg);
