@@ -69,6 +69,10 @@ function initWith(profile) {
   const gameKey = getGameKey(gameDate);
   initGameDayControl(gameDate, gameKey);
 
+  // show help on first load
+  if (!Object.values(profile.stats).some((k) => k.solved))
+    setTimeout(() => showDialog("dialogHelp"));
+
   // ensure game stats for current game exists
   if (!profile.stats[gameKey]) {
     profile.stats[gameKey] = {
@@ -118,11 +122,7 @@ function initWith(profile) {
     if (isOverGuessLimit || lastGuessWasCorrect) {
       if (currentGame.inProgress && lastGuessWasCorrect) {
         // show stats dialog for just solved game
-        setTimeout(() => {
-          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-          // @ts-expect-error
-          document.getElementById("dialogStats")?.showModal?.();
-        }, 300);
+        setTimeout(() => showDialog("dialogStats"), 300);
       }
       currentGame.inProgress = false;
       currentGame.solved = lastGuessWasCorrect;
@@ -429,6 +429,15 @@ function initGameDayControl(gameDate, gameKey) {
     "title",
     `Link to current game ${gameDate.toLocaleDateString()}`
   );
+}
+
+/**
+ * @param {string} id
+ */
+function showDialog(id) {
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-expect-error
+  document.getElementById(id)?.showModal?.();
 }
 
 /**
