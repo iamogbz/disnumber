@@ -259,7 +259,8 @@ function initThemeControl(profile) {
       themes[Number(profile.setting.darkMode)]
     );
   themes.forEach((t) => {
-    document.getElementById(`btn-theme-${t}`)?.addEventListener("click", () => {
+    document.getElementById(`btn-theme-${t}`)?.addEventListener("click", (e) => {
+      e.preventDefault();
       profile.setting.darkMode = !!themes.indexOf(t);
       saveProfile(profile);
       updateTheme();

@@ -2,9 +2,21 @@ html {
   --color-bg: #fff;
   --color-fg: #333;
 
+
+
   &[theme="dark"] {
     --color-bg: #222;
     --color-fg: #eee;
+
+    #btn-theme-dark {
+      pointer-events: none;
+    }
+  }
+
+  &[theme="light"] {
+    #btn-theme-light {
+      pointer-events: none;
+    }
   }
 
   --level-btm: -1;
@@ -67,6 +79,7 @@ select {
   border-style: solid;
   color: var(--color-fg);
   padding: 0.4em 0.6em;
+  user-select: none;
 }
 
 header {
