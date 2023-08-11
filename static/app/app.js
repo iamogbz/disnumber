@@ -69,8 +69,6 @@ function initWith(profile) {
   const gameKey = getGameKey(gameDate);
   initGameDayControl(gameDate, gameKey);
 
-  renderStatistics(profile);
-
   // ensure game stats for current game exists
   if (!profile.stats[gameKey]) {
     profile.stats[gameKey] = {
