@@ -455,6 +455,17 @@ function renderKeyboard(active, disabled) {
     "keys-disabled",
     window.btoa(JSON.stringify(disabled ?? []))
   );
+  // highlight guide digits
+  if ((active?.length ?? 0) < ALLOWED_NUMBERS.length) {
+    active?.forEach((k) => {
+      simpleKeyboard?.shadowRoot
+        ?.querySelector(`[data-key="${k}"]:not([aria-disabled])`)
+        ?.setAttribute(
+          "style",
+          "box-shadow: inset var(--color-injured) 0 0 0.2em 0"
+        );
+    });
+  }
 }
 
 /**

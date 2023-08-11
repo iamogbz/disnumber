@@ -1,8 +1,8 @@
 html {
   --color-bg: #fff;
   --color-fg: #333;
-
-
+  --color-dead: red;
+  --color-injured: orange;
 
   &[theme="dark"] {
     --color-bg: #222;
@@ -185,7 +185,12 @@ main {
   }
 
   &.guess-correct .guess-digit {
-    border-image: linear-gradient(to bottom right, red, orange) 1;
+    border-image: linear-gradient(
+        to bottom right,
+        var(--color-dead),
+        var(--color-injured)
+      )
+      1;
   }
 
   .guess-digit {
@@ -207,11 +212,11 @@ main {
   }
 
   .guess-dead {
-    color: red;
+    color: var(--color-dead);
     right: calc(100% - 2em);
   }
   .guess-injured {
-    color: orange;
+    color: var(--color-injured);
     left: calc(100% - 2em);
   }
 
