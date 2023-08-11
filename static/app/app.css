@@ -1,8 +1,8 @@
 html {
   --color-bg: #fff;
   --color-fg: #333;
-  --color-dead: red;
-  --color-injured: orange;
+  --color-dead: #1b1;
+  --color-injured: #c81;
 
   --level-btm: -1;
   --level-top: 1;
