@@ -247,6 +247,7 @@ main #guesses {
 
 dialog {
   border-radius: 0.6em;
+  min-width: 24em;
 }
 
 dialog form {
