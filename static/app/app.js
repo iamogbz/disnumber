@@ -502,6 +502,8 @@ function renderKeyboard(active, disabled, inProgress) {
  */
 function renderStatistics(profile, gameKey) {
   // statistics
+  const currentGameGuessWidth = profile.stats[gameKey].guesses[0].length;
+  const currentGameGuessCount = profile.stats[gameKey].guesses.length;
   const playedGames = Object.entries(profile.stats).filter(
     ([, v]) => v.guesses.length
   );
@@ -534,49 +536,50 @@ function renderStatistics(profile, gameKey) {
   // set the stat details
   const statDetailsWrapper = document.getElementById("stat-details");
   statDetailsWrapper && (statDetailsWrapper.innerHTML = "");
-  Object.entries(finishedGamesByLength).forEach(
-    ([puzzleLength, puzzleGameKeys]) => {
-      const detailsElement = document.createElement("details");
-      detailsElement.className = CLS_STATS_DETAILS_GROUP;
-      const summaryElement = document.createElement("summary");
-      summaryElement.innerText = `Puzzle length ${puzzleLength}`;
-      detailsElement.appendChild(summaryElement);
-      /** @type {Record<number, number>} */ const solveFreqByGuessCount = {};
-      puzzleGameKeys.forEach((key) => {
-        const solveGuessCount = profile.stats[key].guesses.length;
-        solveFreqByGuessCount[solveGuessCount] =
-          (solveFreqByGuessCount[solveGuessCount] ?? 0) + 1;
-      });
-      const distributionWrapper = document.createElement("div");
-      const mostFrequentBucket = Math.max(
-        ...Object.values(solveFreqByGuessCount)
-      );
-      Object.keys(solveFreqByGuessCount)
-        .map(Number)
-        .sort()
-        .forEach((guessCount) => {
-          const distributionLine = document.createElement("div");
-          distributionLine.className = CLS_STATS_DETAILS_LINE;
-          const solveCount = solveFreqByGuessCount[guessCount];
-          const percentWidth = Math.round(
-            (100 * solveCount) / mostFrequentBucket
-          );
-          distributionLine.setAttribute(
-            "aria-current",
-            String(
-              Number(puzzleLength) ===
-                profile.stats[gameKey].guesses[0].length &&
-                guessCount === profile.stats[gameKey].guesses.length
-            )
-          );
-          distributionLine.innerHTML = `<span>${guessCount}</span>
-          <span class="${CLS_STATS_DIST_LINE_BAR}" style="width: calc(${percentWidth}%)">${solveCount}</span>`;
-          distributionWrapper.appendChild(distributionLine);
-        });
-      detailsElement.appendChild(distributionWrapper);
-      statDetailsWrapper?.appendChild(detailsElement);
+  Object.entries(finishedGamesByLength).forEach(([n, puzzleGameKeys]) => {
+    const puzzleLength = Number(n);
+    const detailsElement = document.createElement("details");
+    if (currentGameGuessWidth === puzzleLength) {
+      detailsElement.setAttribute("open", "true");
     }
-  );
+    detailsElement.className = CLS_STATS_DETAILS_GROUP;
+    const summaryElement = document.createElement("summary");
+    summaryElement.innerText = `Puzzle length ${puzzleLength}`;
+    detailsElement.appendChild(summaryElement);
+    /** @type {Record<number, number>} */ const solveFreqByGuessCount = {};
+    puzzleGameKeys.forEach((key) => {
+      const solveGuessCount = profile.stats[key].guesses.length;
+      solveFreqByGuessCount[solveGuessCount] =
+        (solveFreqByGuessCount[solveGuessCount] ?? 0) + 1;
+    });
+    const distributionWrapper = document.createElement("div");
+    const mostFrequentBucket = Math.max(
+      ...Object.values(solveFreqByGuessCount)
+    );
+    Object.keys(solveFreqByGuessCount)
+      .map(Number)
+      .sort()
+      .forEach((guessCount) => {
+        const distributionLine = document.createElement("div");
+        distributionLine.className = CLS_STATS_DETAILS_LINE;
+        const solveCount = solveFreqByGuessCount[guessCount];
+        const percentWidth = Math.round(
+          (100 * solveCount) / mostFrequentBucket
+        );
+        distributionLine.setAttribute(
+          "aria-current",
+          String(
+            puzzleLength === currentGameGuessWidth &&
+              guessCount === currentGameGuessCount
+          )
+        );
+        distributionLine.innerHTML = `<span>${guessCount}</span>
+          <span class="${CLS_STATS_DIST_LINE_BAR}" style="width: calc(${percentWidth}%)">${solveCount}</span>`;
+        distributionWrapper.appendChild(distributionLine);
+      });
+    detailsElement.appendChild(distributionWrapper);
+    statDetailsWrapper?.appendChild(detailsElement);
+  });
   if (!statDetailsWrapper?.innerHTML) {
     statDetailsWrapper?.appendChild(new Text("No solved games"));
   }
