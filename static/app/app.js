@@ -45,6 +45,10 @@ const EMPTY_PROFILE = Object.freeze({
   stats: {},
 });
 
+const countDeadAndInjured = simpleMemo(_countDeadAndInjured);
+const getSuggestion = simpleMemo(_getSuggestion);
+const allPossible = simpleMemo(_allPossible);
+
 (function init() {
   const initApp = () => initWith(loadProfile());
   window.addEventListener("hashchange", initApp);
@@ -265,32 +269,58 @@ function getSeed(dateObj) {
  * @param {string[]} submittedGuesses
  * @param {string} stagedGuess
  */
-function getSuggestion(actualNumber, submittedGuesses, stagedGuess) {
+function _getSuggestion(actualNumber, submittedGuesses, stagedGuess) {
+  const possible = allPossible(submittedGuesses, actualNumber).filter((p) =>
+    p.startsWith(stagedGuess)
+  );
+
+  return new Set(possible.map((p) => Number(p.charAt(stagedGuess.length))));
+}
+
+/**
+ * Get all reasonably possible based on already submitted guesses
+ * @param {string} actualNumber
+ * @param {string[]} submittedGuesses
+ * @returns {string[]}
+ */
+function _allPossible(submittedGuesses, actualNumber) {
   const isValid = (/** @type {string} */ guess) =>
     new Set(guess).size === guess.length;
 
-  const isPossible = (/** @type {string} */ guess) => {
-    if (!isValid(guess)) return false;
-    for (const submitted of submittedGuesses) {
-      const countActual = countDeadAndInjured(actualNumber, submitted);
-      const countGuess = countDeadAndInjured(guess, submitted);
-      if (JSON.stringify(countActual) !== JSON.stringify(countGuess)) {
-        return false;
+  if (submittedGuesses.length) {
+    const [latestSubmitted] = submittedGuesses.slice(-1);
+    return allPossible(submittedGuesses.slice(0, -1), actualNumber).filter(
+      (guess) => {
+        const countActual = countDeadAndInjured(actualNumber, latestSubmitted);
+        const countGuess = countDeadAndInjured(guess, latestSubmitted);
+        return JSON.stringify(countActual) === JSON.stringify(countGuess);
       }
-    }
-    return true;
-  };
+    );
+  } else {
+    return range(
+      Math.pow(10, actualNumber.length) - 1,
+      Math.pow(10, Math.max(actualNumber.length - 2, 0))
+    )
+      .map(String)
+      .map((g) => `${g.length < actualNumber.length ? 0 : ""}${g}`)
+      .filter(isValid);
+  }
+}
 
-  const possible = range(
-    Math.pow(10, actualNumber.length) - 1,
-    Math.pow(10, Math.max(actualNumber.length - 2, 0))
-  )
-    .map(String)
-    .map((g) => `${g.length < actualNumber.length ? 0 : ""}${g}`)
-    .filter((p) => p.startsWith(stagedGuess))
-    .filter(isPossible);
-
-  return new Set(possible.map((p) => Number(p.charAt(stagedGuess.length))));
+/**
+ * @param {string} actual
+ * @param {string} guess
+ * @returns {readonly [number, number]}
+ */
+function _countDeadAndInjured(actual, guess) {
+  let deadCount = 0;
+  let injuredCount = 0;
+  actual.split("").map((n, i) => {
+    if (n === guess[i]) deadCount += 1;
+    if (guess.includes(n)) injuredCount += 1;
+  });
+  injuredCount -= deadCount;
+  return Object.freeze([deadCount, injuredCount]);
 }
 
 /**
@@ -661,27 +691,27 @@ function renderGuessEntry(guess, actual, isStaged, recycle) {
 }
 
 /**
- * @param {string} actual
- * @param {string} guess
- * @returns {readonly [number, number]}
- */
-function countDeadAndInjured(actual, guess) {
-  let deadCount = 0;
-  let injuredCount = 0;
-  actual.split("").map((n, i) => {
-    if (n === guess[i]) deadCount += 1;
-    if (guess.includes(n)) injuredCount += 1;
-  });
-  injuredCount -= deadCount;
-  return Object.freeze([deadCount, injuredCount]);
-}
-
-/**
  * @param {number} to
  * @param {number} [from]
  */
 function range(to, from = 0) {
   return new Array(to - from + 1).fill(null).map((_, i) => from + i);
+}
+
+/**
+ * @template T
+ * @param {T extends (...args: any[]) => any ? T : never} fn
+ */
+function simpleMemo(fn) {
+  /** @type {Record<string, ReturnType<typeof fn>>} */
+  const argResultMap = {};
+  return function memoisedFn(/** @type {Parameters<typeof fn>} */ ...args) {
+    const key = JSON.stringify(args);
+    if (!(key in argResultMap)) {
+      argResultMap[key] = fn(...args);
+    }
+    return argResultMap[key];
+  };
 }
 
 /**
