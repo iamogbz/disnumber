@@ -22,7 +22,8 @@ html[theme="light"] #btn-theme-light {
 }
 
 * {
-  transition: height, width 0.2s ease-in-out, opacity 0.3s ease-in-out;
+  transition: border, height, margin, padding, transform, width 0.2s ease-in-out,
+    background-color, border-color, color, opacity 0.3s ease-in-out;
 }
 
 html,
@@ -305,7 +306,7 @@ dialog form {
 
 #dialogStats .stats-details-group,
 #dialogStats .stats-details-line {
-  font-size: 0.8em;
+  font-size: 0.9em;
   font-weight: 600;
 }
 
@@ -323,6 +324,12 @@ dialog form {
   direction: rtl;
   display: inline-block;
   text-indent: 1em;
+}
+
+#dialogStats .stats-link-unsolved {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
 }
 
 footer {

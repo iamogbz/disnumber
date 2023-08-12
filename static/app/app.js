@@ -20,6 +20,7 @@ const CLS_GUESS_COUNT_INJURED = "guess-injured";
 const CLS_STATS_DETAILS_GROUP = "stats-details-group";
 const CLS_STATS_DETAILS_LINE = "stats-details-line";
 const CLS_STATS_DIST_LINE_BAR = "stats-dist-line-bar";
+const CLS_STATS_LINK_SOLVED_PUZZLE = "stats-link-unsolved";
 const MAX_GUESS_COUNT = 9;
 const MAX_DIGIT_COUNT = 10;
 /** @type {{
@@ -576,8 +577,10 @@ function renderStatistics(profile) {
       const linksWrapper = document.createElement("div");
       puzzleGameKeys.sort().forEach((key) => {
         const link = document.createElement("a");
+        link.title = `Continue puzzle ${key}`
+        link.className = CLS_STATS_LINK_SOLVED_PUZZLE;
         link.href = `#${key}`;
-        link.innerText = `${key}: ${profile.stats[key].guesses.length} attempts`;
+        link.innerHTML = `<span>${key}</span><span>${profile.stats[key].guesses.length} attempts</span>`;
         linksWrapper.appendChild(link);
       });
       detailsElement.appendChild(linksWrapper);
