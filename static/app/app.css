@@ -326,6 +326,10 @@ dialog form {
   text-indent: 1em;
 }
 
+#dialogStats .stats-details-line[aria-current="true"] .stats-dist-line-bar {
+  background: color-mix(in srgb, var(--color-dead) 60%, var(--color-bg));
+}
+
 #dialogStats .stats-link-unsolved {
   align-items: center;
   display: flex;

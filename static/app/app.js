@@ -135,7 +135,7 @@ function initWith(profile) {
 
     renderKeyboard(activeKeys, disabledKeys, currentGame.inProgress);
     renderGuesses(guessesToRender, numberForTheDay, currentGuess);
-    renderStatistics(profile);
+    renderStatistics(profile, gameKey);
     saveProfile(profile);
   };
 
@@ -498,8 +498,9 @@ function renderKeyboard(active, disabled, inProgress) {
 
 /**
  * @param {ReturnType<typeof loadProfile>} profile
+ * @param {string} gameKey
  */
-function renderStatistics(profile) {
+function renderStatistics(profile, gameKey) {
   // statistics
   const playedGames = Object.entries(profile.stats).filter(
     ([, v]) => v.guesses.length
@@ -559,6 +560,14 @@ function renderStatistics(profile) {
           const solveCount = solveFreqByGuessCount[guessCount];
           const percentWidth = Math.round(
             (100 * solveCount) / mostFrequentBucket
+          );
+          distributionLine.setAttribute(
+            "aria-current",
+            String(
+              Number(puzzleLength) ===
+                profile.stats[gameKey].guesses[0].length &&
+                guessCount === profile.stats[gameKey].guesses.length
+            )
           );
           distributionLine.innerHTML = `<span>${guessCount}</span>
           <span class="${CLS_STATS_DIST_LINE_BAR}" style="width: calc(${percentWidth}%)">${solveCount}</span>`;
