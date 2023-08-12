@@ -6,12 +6,6 @@ const ID_LINK_NEXT_DAY = "link-next-day";
 const ID_CURRENT_DAY_TAG = "current-day";
 const KEY_BKSPC = "Backspace";
 const KEY_ENTER = "Enter";
-/**
- * @param {number} to
- * @param {number} [from]
- */
-const range = (to, from = 0) =>
-  new Array(to - from + 1).fill(null).map((_, i) => from + i);
 const ALLOWED_NUMBERS = range(9);
 const GAME_KEYBOARD = [
   ALLOWED_NUMBERS.slice(0, Math.ceil(ALLOWED_NUMBERS.length / 2)),
@@ -691,6 +685,14 @@ function countDeadAndInjured(actual, guess) {
   });
   injuredCount -= deadCount;
   return Object.freeze([deadCount, injuredCount]);
+}
+
+/**
+ * @param {number} to
+ * @param {number} [from]
+ */
+function range(to, from = 0) {
+  return new Array(to - from + 1).fill(null).map((_, i) => from + i);
 }
 
 /**
