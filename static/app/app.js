@@ -268,21 +268,13 @@ function getSeed(dateObj) {
 function getSuggestion(actualNumber, submittedGuesses, stagedGuess) {
   const isValid = (/** @type {string} */ guess) =>
     new Set(guess).size === guess.length;
+
   const isPossible = (/** @type {string} */ guess) => {
     if (!isValid(guess)) return false;
-    for (const prevGuess of submittedGuesses) {
-      const [countExpectedDead, countExpectedInjured] = countDeadAndInjured(
-        actualNumber,
-        prevGuess
-      );
-      const [countGuessedDead, countGuessedInjured] = countDeadAndInjured(
-        guess,
-        prevGuess
-      );
-      if (
-        countExpectedDead !== countGuessedDead ||
-        countExpectedInjured !== countGuessedInjured
-      ) {
+    for (const submitted of submittedGuesses) {
+      const countActual = countDeadAndInjured(actualNumber, submitted);
+      const countGuess = countDeadAndInjured(guess, submitted);
+      if (JSON.stringify(countActual) !== JSON.stringify(countGuess)) {
         return false;
       }
     }
@@ -295,13 +287,10 @@ function getSuggestion(actualNumber, submittedGuesses, stagedGuess) {
   )
     .map(String)
     .map((g) => `${g.length < actualNumber.length ? 0 : ""}${g}`)
+    .filter((p) => p.startsWith(stagedGuess))
     .filter(isPossible);
 
-  return new Set(
-    possible
-      .filter((p) => p.startsWith(stagedGuess))
-      .map((p) => Number(p.charAt(stagedGuess.length)))
-  );
+  return new Set(possible.map((p) => Number(p.charAt(stagedGuess.length))));
 }
 
 /**
