@@ -209,10 +209,10 @@ function storeValue(key, value) {
  * Get game date, clamping to current date but allowing previous days
  */
 function getGameDate() {
-  const now = Date.now();
+  const now = new Date();
   const hashDate = new Date(window.location.hash.split("#").pop() ?? now);
-  if (Number.isNaN(hashDate.getTime())) return new Date(now);
-  return new Date(Math.min(now, hashDate.getTime()));
+  if (Number.isNaN(hashDate.getTime())) return now;
+  return new Date(Math.min(now.getTime(), hashDate.getTime()));
 }
 
 /**
@@ -227,6 +227,14 @@ function getGameKey(dateObj) {
   ]
     .map((v) => `${v < 10 ? "0" : ""}${v}`)
     .join("-");
+}
+
+/**
+ * Convert date object to string e.g. `Fri, 01 Sep 2023` for 2023-09-01
+ * @param {Date} dateObj
+ */
+function getDateString(dateObj) {
+  return dateObj.toUTCString().slice(0, 16);
 }
 
 /**
@@ -417,7 +425,7 @@ function initGameDayControl(gameDate, gameKey) {
   linkToPreviousDay?.setAttribute("href", `#${prevDayGameKey}`);
   linkToPreviousDay?.setAttribute(
     "title",
-    `Go to game for ${prevGameDate.toLocaleDateString()}`
+    `Go to game for ${getDateString(prevGameDate)}`
   );
 
   // next day
@@ -429,7 +437,7 @@ function initGameDayControl(gameDate, gameKey) {
     linkToNextDay?.setAttribute("href", `#${nextGameDateKey}`);
     linkToNextDay?.setAttribute(
       "title",
-      `Go to game for ${nextGameDate.toLocaleDateString()}`
+      `Go to game for ${getDateString(nextGameDate)}`
     );
   } else {
     linkToNextDay?.setAttribute("href", "#");
@@ -441,7 +449,7 @@ function initGameDayControl(gameDate, gameKey) {
   currentDayLabel?.setAttribute("href", `#${gameKey}`);
   currentDayLabel?.setAttribute(
     "title",
-    `Link to current game ${gameDate.toLocaleDateString()}`
+    `Link to current game ${getDateString(gameDate)}`
   );
 }
 
@@ -577,10 +585,11 @@ function renderStatistics(profile) {
       const linksWrapper = document.createElement("div");
       puzzleGameKeys.sort().forEach((key) => {
         const link = document.createElement("a");
-        link.title = `Continue puzzle ${key}`
+        const dateString = getDateString(new Date(key));
+        link.title = `Continue puzzle from ${dateString}`;
         link.className = CLS_STATS_LINK_SOLVED_PUZZLE;
         link.href = `#${key}`;
-        link.innerHTML = `<span>${key}</span><span>${profile.stats[key].guesses.length} attempts</span>`;
+        link.innerHTML = `<span>${dateString}</span><span>${profile.stats[key].guesses.length} attempts</span>`;
         linksWrapper.appendChild(link);
       });
       detailsElement.appendChild(linksWrapper);
