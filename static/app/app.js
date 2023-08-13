@@ -517,7 +517,8 @@ function renderKeyboard(active, disabled, inProgress) {
  */
 function renderStatistics(profile, gameKey) {
   // statistics
-  const currentGameGuessWidth = profile.stats[gameKey].guesses[0].length;
+  const currentGameInProgress = profile.stats[gameKey].inProgress;
+  const currentGameGuessWidth = profile.stats[gameKey].guesses[0]?.length;
   const currentGameGuessCount = profile.stats[gameKey].guesses.length;
   const playedGames = Object.entries(profile.stats).filter(
     ([, v]) => v.guesses.length
@@ -554,7 +555,7 @@ function renderStatistics(profile, gameKey) {
   Object.entries(finishedGamesByLength).forEach(([n, puzzleGameKeys]) => {
     const puzzleLength = Number(n);
     const detailsElement = document.createElement("details");
-    if (currentGameGuessWidth === puzzleLength) {
+    if (!currentGameInProgress && currentGameGuessWidth === puzzleLength) {
       detailsElement.setAttribute(ATTR_OPEN, "true");
     }
     detailsElement.className = CLS_STATS_DETAILS_GROUP;
@@ -585,7 +586,8 @@ function renderStatistics(profile, gameKey) {
           ATTR_CURRENT,
           String(
             puzzleLength === currentGameGuessWidth &&
-              guessCount === currentGameGuessCount
+              guessCount === currentGameGuessCount &&
+              !currentGameInProgress
           )
         );
         distributionLine.innerHTML = `<span>${guessCount}</span>
@@ -602,27 +604,30 @@ function renderStatistics(profile, gameKey) {
   // set the unfinished game links
   const statUnsolvedWrapper = document.getElementById(ID_STAT_UNSOLVED);
   statUnsolvedWrapper && (statUnsolvedWrapper.innerHTML = "");
-  Object.entries(unfinishedGamesByLength).forEach(
-    ([puzzleLength, puzzleGameKeys]) => {
-      const detailsElement = document.createElement("details");
-      detailsElement.className = CLS_STATS_DETAILS_GROUP;
-      const summaryElement = document.createElement("summary");
-      summaryElement.innerText = `Puzzle length ${puzzleLength}`;
-      detailsElement.appendChild(summaryElement);
-      const linksWrapper = document.createElement("div");
-      puzzleGameKeys.sort().forEach((key) => {
-        const link = document.createElement("a");
-        const dateString = getDateString(new Date(key));
-        link.title = `Continue puzzle from ${dateString}`;
-        link.className = CLS_STATS_LINK_SOLVED_PUZZLE;
-        link.href = `#${key}`;
-        link.innerHTML = `<span>${dateString}</span><span>${profile.stats[key].guesses.length} attempts</span>`;
-        linksWrapper.appendChild(link);
-      });
-      detailsElement.appendChild(linksWrapper);
-      statUnsolvedWrapper?.appendChild(detailsElement);
+  Object.entries(unfinishedGamesByLength).forEach(([n, puzzleGameKeys]) => {
+    const puzzleLength = Number(n);
+    const detailsElement = document.createElement("details");
+    detailsElement.className = CLS_STATS_DETAILS_GROUP;
+    if (currentGameInProgress && currentGameGuessWidth === puzzleLength) {
+      detailsElement.setAttribute(ATTR_OPEN, "true");
     }
-  );
+    const summaryElement = document.createElement("summary");
+    summaryElement.innerText = `Puzzle length ${puzzleLength}`;
+    detailsElement.appendChild(summaryElement);
+    const linksWrapper = document.createElement("div");
+    puzzleGameKeys.sort().forEach((key) => {
+      const link = document.createElement("a");
+      link.setAttribute(ATTR_CURRENT, String(gameKey === key));
+      const dateString = getDateString(new Date(key));
+      link.title = `Continue puzzle from ${dateString}`;
+      link.className = CLS_STATS_LINK_SOLVED_PUZZLE;
+      link.href = `#${key}`;
+      link.innerHTML = `<span>${dateString}</span><span>${profile.stats[key].guesses.length} attempts</span>`;
+      linksWrapper.appendChild(link);
+    });
+    detailsElement.appendChild(linksWrapper);
+    statUnsolvedWrapper?.appendChild(detailsElement);
+  });
   if (!statUnsolvedWrapper?.innerHTML) {
     statUnsolvedWrapper?.appendChild(new Text("No unsolved games"));
   }

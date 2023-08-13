@@ -336,6 +336,10 @@ dialog form {
   justify-content: space-between;
 }
 
+#dialogStats .stats-link-unsolved[aria-current="true"] {
+  color: color-mix(in srgb, var(--color-injured) 60%, var(--color-fg));
+}
+
 footer {
   align-items: center;
   background-color: var(--color-bg);
@@ -359,6 +363,10 @@ footer simple-keyboard {
   border-width: 0.1em;
   font-size: 2em;
   padding: 0.5em;
+}
+
+#label-copyright {
+  opacity: 0.1;
 }
 
 /** Mobile */
