@@ -732,7 +732,7 @@ function renderGuessEntry(guess, actual, isStaged, recycle) {
       injuredCountWrapper.setAttribute(ATTR_TITLE, `${injuredCount} injured`);
     } else {
       guessDivWrapper.classList.add(CLS_GUESS_ENTRY_SOLVED);
-      guessDivWrapper.addEventListener("click", () => {
+      guessDivWrapper.addEventListener("click", async () => {
         const gameDate = getGameDate();
         const gameKey = getGameKey(gameDate);
         const gameName = getDateString(gameDate);
@@ -757,9 +757,8 @@ function renderGuessEntry(guess, actual, isStaged, recycle) {
         const onCopySuccess = () => {
           guessDivWrapper.classList.add(CLS_GUESS_SOLVED_COPY_SUCCESS);
         };
-        const onCopyFailure = (/** @type {unknown} */ e) => {
+        const onCopyFailure = () => {
           guessDivWrapper.classList.add(CLS_GUESS_SOLVED_COPY_FAILURE);
-          console.error(e);
         };
         const resetCopyState = () => {
           setTimeout(() => {
@@ -771,13 +770,10 @@ function renderGuessEntry(guess, actual, isStaged, recycle) {
         };
 
         try {
-          if (navigator.clipboard?.writeText) {
-            navigator.clipboard
-              .writeText(shareText)
-              .then(onCopySuccess)
-              .catch(onCopyFailure)
-              .finally(resetCopyState);
-          } else {
+          try {
+            await navigator.clipboard.writeText(shareText);
+          } catch (e) {
+            console.error(e);
             // Fallback for browsers without Clipboard API support
             const textarea =
               Array.from(document.getElementsByTagName("textarea")).find(
@@ -790,11 +786,12 @@ function renderGuessEntry(guess, actual, isStaged, recycle) {
             moveChildInto(document.body, textarea);
             textarea.select();
             document.execCommand("copy");
-            onCopySuccess();
             textarea.remove();
           }
+          onCopySuccess();
         } catch (e) {
-          onCopyFailure(e);
+          console.error(e);
+          onCopyFailure();
         } finally {
           resetCopyState();
         }
