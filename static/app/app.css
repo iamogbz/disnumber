@@ -141,9 +141,11 @@ main #guesses {
 }
 
 .guess-entry {
+  align-items: center;
   display: flex;
   flex-direction: row;
   gap: 0.2em;
+  justify-content: center;
   margin-top: 0em;
   padding: 0 0.2em;
   position: relative;
@@ -180,6 +182,29 @@ main #guesses {
 .guess-entry[aria-disabled="true"] .guess-digit {
   background-color: color-mix(in srgb, var(--color-fg) 14%, transparent);
   border-color: transparent;
+}
+
+.guess-entry.guess-correct {
+  cursor: pointer;
+}
+
+.guess-entry.guess-correct::before {
+  align-items: center;
+  content: 'Share results 📤';
+  display: flex;
+  font-size: 0.5em;
+  justify-content: center;
+  padding: 1em;
+  position: absolute;
+  text-align: center;
+  top: 100%;
+  user-select: none;
+}
+.guess-entry.guess-correct.guess-solved-copy-success::before {
+  content: 'Copied results to clipboard 📋';
+}
+.guess-entry.guess-correct.guess-solved-copy-failure::before {
+  content: 'Oops failed to copy results ❌';
 }
 
 .guess-entry.guess-correct .guess-digit {
@@ -362,6 +387,7 @@ footer simple-keyboard {
   border-style: solid;
   border-width: 0.1em;
   font-size: 2em;
+  margin: 1em auto;
   padding: 0.5em;
 }
 

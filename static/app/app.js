@@ -3,6 +3,7 @@ const ID_BTN_TOGGLE_HINT = "btn-hint-toggle";
 const ID_OPT_DIGIT_COUNT = "opt-digits";
 const ID_SIMPLE_KEYBOARD = "keyboard";
 const ID_GUESSES_WRAPPER = "guesses";
+const ID_RESULTS_WRAPPER = "results";
 const ID_LINK_PREV_DAY = "link-prev-day";
 const ID_LINK_NEXT_DAY = "link-next-day";
 const ID_CURRENT_DAY_TAG = "current-day";
@@ -37,6 +38,8 @@ const CLS_STATS_DETAILS_GROUP = "stats-details-group";
 const CLS_STATS_DETAILS_LINE = "stats-details-line";
 const CLS_STATS_DIST_LINE_BAR = "stats-dist-line-bar";
 const CLS_STATS_LINK_SOLVED_PUZZLE = "stats-link-unsolved";
+const CLS_GUESS_SOLVED_COPY_SUCCESS = "guess-solved-copy-success";
+const CLS_GUESS_SOLVED_COPY_FAILURE = "guess-solved-copy-failure";
 const MAX_GUESS_COUNT = 9;
 const MAX_DIGIT_COUNT = 10;
 /** @type {{
@@ -729,6 +732,73 @@ function renderGuessEntry(guess, actual, isStaged, recycle) {
       injuredCountWrapper.setAttribute(ATTR_TITLE, `${injuredCount} injured`);
     } else {
       guessDivWrapper.classList.add(CLS_GUESS_ENTRY_SOLVED);
+      guessDivWrapper.addEventListener("click", () => {
+        const gameDate = getGameDate();
+        const gameKey = getGameKey(gameDate);
+        const gameName = getDateString(gameDate);
+        const gameUrl = `https://ogbizi.com/dai-pwa#${gameKey}`;
+        const profile = loadProfile();
+        if (profile.stats[gameKey].guesses.slice(-1)[0] !== actual) return;
+        const guessCount = profile.stats[gameKey].guesses.length;
+        const guessLines = profile.stats[gameKey].guesses
+          .map((g) =>
+            g
+              .split("")
+              .map((n, i) => {
+                if (n === actual[i]) return "🟩";
+                if (actual.includes(n)) return "🟧";
+                return profile.setting.darkMode ? "⬛" : "⬜";
+              })
+              .join("")
+          )
+          .join("\n");
+        const shareText = `Disnumber game: ${gameName}.\nSolved in ${guessCount} guesses.\n\n${guessLines}\n\n${gameUrl}`;
+
+        const onCopySuccess = () => {
+          guessDivWrapper.classList.add(CLS_GUESS_SOLVED_COPY_SUCCESS);
+        };
+        const onCopyFailure = (/** @type {unknown} */ e) => {
+          guessDivWrapper.classList.add(CLS_GUESS_SOLVED_COPY_FAILURE);
+          console.error(e);
+        };
+        const resetCopyState = () => {
+          setTimeout(() => {
+            guessDivWrapper.classList.remove(
+              CLS_GUESS_SOLVED_COPY_SUCCESS,
+              CLS_GUESS_SOLVED_COPY_FAILURE
+            );
+          }, 2000);
+        };
+
+        try {
+          if (navigator.clipboard?.writeText) {
+            navigator.clipboard
+              .writeText(shareText)
+              .then(onCopySuccess)
+              .catch(onCopyFailure)
+              .finally(resetCopyState);
+          } else {
+            // Fallback for browsers without Clipboard API support
+            const textarea =
+              Array.from(document.getElementsByTagName("textarea")).find(
+                (elem) => elem.id === ID_RESULTS_WRAPPER
+              ) ?? document.createElement("textarea");
+            textarea.id = ID_RESULTS_WRAPPER;
+            textarea.value = shareText;
+            textarea.style.visibility = "invisible";
+            textarea.setAttribute(ATTR_HIDDEN, "true");
+            moveChildInto(document.body, textarea);
+            textarea.select();
+            document.execCommand("copy");
+            onCopySuccess();
+            textarea.remove();
+          }
+        } catch (e) {
+          onCopyFailure(e);
+        } finally {
+          resetCopyState();
+        }
+      });
     }
   } else {
     guessDivWrapper.setAttribute(ATTR_DISABLED, "false");
