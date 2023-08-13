@@ -165,19 +165,19 @@ main #guesses {
   width: 1em;
 }
 
-.guess-entry[hidden="true"] {
+.guess-entry[aria-hidden="true"] {
   margin-top: -2em;
   z-index: var(--level-btm);
 }
 
-.guess-entry[hidden="true"] span {
+.guess-entry[aria-hidden="true"] span {
   /* border-width: 0em; */
   opacity: 0;
   /* padding: 0em; */
   /* visibility: hidden; */
 }
 
-.guess-entry[disabled="true"] .guess-digit {
+.guess-entry[aria-disabled="true"] .guess-digit {
   background-color: color-mix(in srgb, var(--color-fg) 14%, transparent);
   border-color: transparent;
 }
@@ -219,15 +219,15 @@ main #guesses {
   left: calc(100% - 2em);
 }
 
-.guess-entry[disabled="true"]:not(.guess-correct) .guess-dead,
-.guess-entry[disabled="true"]:not(.guess-correct) .guess-injured {
+.guess-entry[aria-disabled="true"]:not(.guess-correct) .guess-dead,
+.guess-entry[aria-disabled="true"]:not(.guess-correct) .guess-injured {
   opacity: 1;
   width: 1em;
 }
-.guess-entry[disabled="true"]:not(.guess-correct) .guess-dead {
+.guess-entry[aria-disabled="true"]:not(.guess-correct) .guess-dead {
   right: 100%;
 }
-.guess-entry[disabled="true"]:not(.guess-correct) .guess-injured {
+.guess-entry[aria-disabled="true"]:not(.guess-correct) .guess-injured {
   left: 100%;
 }
 

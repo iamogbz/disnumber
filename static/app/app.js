@@ -1,9 +1,17 @@
 const APP_KEY_PROFILE = "dai-app-profile";
+const ID_BTN_TOGGLE_HINT = "btn-hint-toggle";
+const ID_OPT_DIGIT_COUNT = "opt-digits";
 const ID_SIMPLE_KEYBOARD = "keyboard";
 const ID_GUESSES_WRAPPER = "guesses";
 const ID_LINK_PREV_DAY = "link-prev-day";
 const ID_LINK_NEXT_DAY = "link-next-day";
 const ID_CURRENT_DAY_TAG = "current-day";
+const ID_DIALOG_HELP = "dialogHelp";
+const ID_DIALOG_STATS = "dialogStats";
+const ID_STAT_PLAY_COUNT = "stat-play-count";
+const ID_STAT_SOLVE_PRCNT = "stat-solve-percent";
+const ID_STAT_DETAILS = "stat-details";
+const ID_STAT_UNSOLVED = "stat-unsolved";
 const KEY_BKSPC = "Backspace";
 const KEY_ENTER = "Enter";
 const ALLOWED_NUMBERS = range(9);
@@ -12,6 +20,14 @@ const GAME_KEYBOARD = [
   ALLOWED_NUMBERS.slice(-Math.floor(ALLOWED_NUMBERS.length / 2)),
   [KEY_BKSPC, "", KEY_ENTER],
 ];
+const ATTR_CURRENT = "aria-current";
+const ATTR_DISABLED = "aria-disabled";
+const ATTR_FILLED = "filled";
+const ATTR_HIDDEN = "aria-hidden";
+const ATTR_LINK_URL = "href";
+const ATTR_OPEN = "open";
+const ATTR_TAB_IDX = "tab-index";
+const ATTR_TITLE = "title";
 const CLS_GUESS_ENTRY = "guess-entry";
 const CLS_GUESS_ENTRY_SOLVED = "guess-correct";
 const CLS_GUESS_DIGIT = "guess-digit";
@@ -70,7 +86,7 @@ function initWith(profile) {
 
   // show help on first load
   if (!Object.values(profile.stats).some((k) => k.solved))
-    setTimeout(() => showDialog("dialogHelp"));
+    setTimeout(() => showDialog(ID_DIALOG_HELP));
 
   // ensure game stats for current game exists
   if (!profile.stats[gameKey]) {
@@ -121,7 +137,7 @@ function initWith(profile) {
     if (isOverGuessLimit || lastGuessWasCorrect) {
       if (currentGame.inProgress && lastGuessWasCorrect) {
         // show stats dialog for just solved game
-        setTimeout(() => showDialog("dialogStats"), 300);
+        setTimeout(() => showDialog(ID_DIALOG_STATS), 300);
       }
       currentGame.inProgress = false;
       currentGame.solved = lastGuessWasCorrect;
@@ -366,7 +382,7 @@ function initDigitControl(profile) {
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-expect-error typescript can not handle it
   /** @type {HTMLSelectElement} */ const optWrapper =
-    document.getElementById("opt-digits");
+    document.getElementById(ID_OPT_DIGIT_COUNT);
   optWrapper && (optWrapper.innerHTML = "");
   optWrapper?.addEventListener("change", () => {
     const newValue = Number(optWrapper.value);
@@ -390,7 +406,7 @@ function initDigitControl(profile) {
  * @param {ReturnType<typeof loadProfile>} profile
  */
 function initHintControl(profile) {
-  const toggleButton = document.getElementById("btn-hint-toggle");
+  const toggleButton = document.getElementById(ID_BTN_TOGGLE_HINT);
   const setEnabled = (/** @type {boolean} */ enabled) => {
     profile.setting.hints.disableImpossible = enabled;
     profile.setting.hints.enableBestGuesses = enabled;
@@ -417,16 +433,15 @@ function initHintControl(profile) {
  * @param {String} gameKey
  */
 function initGameDayControl(gameDate, gameKey) {
+  /** @param {Date} dateObj */
+  const gotoGameFor = (dateObj) => `Go to game for ${getDateString(dateObj)}`;
   // prev day
   const prevGameDate = new Date(gameDate.getTime());
   prevGameDate.setDate(prevGameDate.getDate() - 1);
   const prevDayGameKey = getGameKey(prevGameDate);
   const linkToPreviousDay = document.getElementById(ID_LINK_PREV_DAY);
-  linkToPreviousDay?.setAttribute("href", `#${prevDayGameKey}`);
-  linkToPreviousDay?.setAttribute(
-    "title",
-    `Go to game for ${getDateString(prevGameDate)}`
-  );
+  linkToPreviousDay?.setAttribute(ATTR_LINK_URL, `#${prevDayGameKey}`);
+  linkToPreviousDay?.setAttribute(ATTR_TITLE, gotoGameFor(prevGameDate));
 
   // next day
   const nextGameDate = new Date(gameDate.getTime());
@@ -434,21 +449,21 @@ function initGameDayControl(gameDate, gameKey) {
   nextGameDate.setDate(nextGameDate.getDate() + 1);
   if (nextGameDate.getTime() < Date.now()) {
     const nextGameDateKey = getGameKey(nextGameDate);
-    linkToNextDay?.setAttribute("href", `#${nextGameDateKey}`);
-    linkToNextDay?.setAttribute(
-      "title",
-      `Go to game for ${getDateString(nextGameDate)}`
-    );
+    linkToNextDay?.setAttribute(ATTR_LINK_URL, `#${nextGameDateKey}`);
+    linkToNextDay?.setAttribute(ATTR_TITLE, gotoGameFor(nextGameDate));
   } else {
-    linkToNextDay?.setAttribute("href", "#");
-    linkToNextDay?.setAttribute("title", "Come back tomorrow for a new puzzle");
+    linkToNextDay?.setAttribute(ATTR_LINK_URL, "#");
+    linkToNextDay?.setAttribute(
+      ATTR_TITLE,
+      "Come back tomorrow for a new puzzle"
+    );
   }
 
   // curr day
   const currentDayLabel = document.getElementById(ID_CURRENT_DAY_TAG);
-  currentDayLabel?.setAttribute("href", `#${gameKey}`);
+  currentDayLabel?.setAttribute(ATTR_LINK_URL, `#${gameKey}`);
   currentDayLabel?.setAttribute(
-    "title",
+    ATTR_TITLE,
     `Link to current game ${getDateString(gameDate)}`
   );
 }
@@ -486,14 +501,14 @@ function renderKeyboard(active, disabled, inProgress) {
   setTimeout(() => {
     active?.forEach((k) => {
       simpleKeyboard?.shadowRoot
-        ?.querySelector(`[data-key="${k}"]:not([aria-disabled])`)
+        ?.querySelector(`[data-key="${k}"]:not([${ATTR_DISABLED}])`)
         ?.setAttribute(
           "style",
           "box-shadow: inset var(--color-injured) 0 0 0 0.1em"
         );
     });
   });
-  simpleKeyboard?.setAttribute("aria-disabled", String(Boolean(!inProgress)));
+  simpleKeyboard?.setAttribute(ATTR_DISABLED, String(Boolean(!inProgress)));
 }
 
 /**
@@ -525,22 +540,22 @@ function renderStatistics(profile, gameKey) {
   });
 
   // set the summary tiles
-  const playCountWrapper = document.getElementById("stat-play-count");
+  const playCountWrapper = document.getElementById(ID_STAT_PLAY_COUNT);
   playCountWrapper && (playCountWrapper.innerText = `${finishedGames.length}`);
-  const statSolveWrapper = document.getElementById("stat-solve-percent");
+  const statSolveWrapper = document.getElementById(ID_STAT_SOLVE_PRCNT);
   const statSolvePercent = playedGames.length
     ? Math.round((100 * finishedGames.length) / playedGames.length)
     : 0;
   statSolveWrapper && (statSolveWrapper.innerText = `${statSolvePercent}`);
 
   // set the stat details
-  const statDetailsWrapper = document.getElementById("stat-details");
+  const statDetailsWrapper = document.getElementById(ID_STAT_DETAILS);
   statDetailsWrapper && (statDetailsWrapper.innerHTML = "");
   Object.entries(finishedGamesByLength).forEach(([n, puzzleGameKeys]) => {
     const puzzleLength = Number(n);
     const detailsElement = document.createElement("details");
     if (currentGameGuessWidth === puzzleLength) {
-      detailsElement.setAttribute("open", "true");
+      detailsElement.setAttribute(ATTR_OPEN, "true");
     }
     detailsElement.className = CLS_STATS_DETAILS_GROUP;
     const summaryElement = document.createElement("summary");
@@ -567,7 +582,7 @@ function renderStatistics(profile, gameKey) {
           (100 * solveCount) / mostFrequentBucket
         );
         distributionLine.setAttribute(
-          "aria-current",
+          ATTR_CURRENT,
           String(
             puzzleLength === currentGameGuessWidth &&
               guessCount === currentGameGuessCount
@@ -585,7 +600,7 @@ function renderStatistics(profile, gameKey) {
   }
 
   // set the unfinished game links
-  const statUnsolvedWrapper = document.getElementById("stat-unsolved");
+  const statUnsolvedWrapper = document.getElementById(ID_STAT_UNSOLVED);
   statUnsolvedWrapper && (statUnsolvedWrapper.innerHTML = "");
   Object.entries(unfinishedGamesByLength).forEach(
     ([puzzleLength, puzzleGameKeys]) => {
@@ -634,7 +649,7 @@ function renderGuesses(guesses, actual, stagedGuess) {
         guessesContainer.children.item(i)
       );
       guessWrapper.setAttribute(
-        "hidden",
+        ATTR_HIDDEN,
         String(i > guesses.length || (i === guesses.length && isSolved))
       );
       return guessWrapper;
@@ -658,20 +673,20 @@ function renderGuessEntry(guess, actual, isStaged, recycle) {
   const guessTabIndex = 0;
   const guessDivWrapper = recycle ?? document.createElement("div");
   guessDivWrapper.className = CLS_GUESS_ENTRY;
-  guessDivWrapper.setAttribute("title", guess);
+  guessDivWrapper.setAttribute(ATTR_TITLE, guess);
 
   const deadCountWrapper =
     guessDivWrapper.getElementsByClassName(CLS_GUESS_COUNT_DEAD).item(0) ??
     document.createElement("span");
   deadCountWrapper.className = CLS_GUESS_COUNT_DEAD;
-  deadCountWrapper.setAttribute("tab-index", `${guessTabIndex}`);
+  deadCountWrapper.setAttribute(ATTR_TAB_IDX, `${guessTabIndex}`);
   moveChildInto(guessDivWrapper, deadCountWrapper);
 
   const injuredCountWrapper =
     guessDivWrapper.getElementsByClassName(CLS_GUESS_COUNT_INJURED).item(0) ??
     document.createElement("span");
   injuredCountWrapper.className = CLS_GUESS_COUNT_INJURED;
-  injuredCountWrapper.setAttribute("tab-index", `${guessTabIndex}`);
+  injuredCountWrapper.setAttribute(ATTR_TAB_IDX, `${guessTabIndex}`);
   moveChildInto(guessDivWrapper, injuredCountWrapper);
 
   const digitWrappers = guessDivWrapper.getElementsByClassName(CLS_GUESS_DIGIT);
@@ -682,7 +697,10 @@ function renderGuessEntry(guess, actual, isStaged, recycle) {
         digitWrappers.item(i) ?? document.createElement("span");
       digitWrapper.className = CLS_GUESS_DIGIT;
       digitWrapper.textContent = guess[i] ?? "";
-      digitWrapper.setAttribute("filled", String(!!digitWrapper.textContent));
+      digitWrapper.setAttribute(
+        ATTR_FILLED,
+        String(!!digitWrapper.textContent)
+      );
       return digitWrapper;
     })
     .forEach((c) => moveChildInto(guessDivWrapper, c));
@@ -695,20 +713,20 @@ function renderGuessEntry(guess, actual, isStaged, recycle) {
   const [deadCount, injuredCount] = countDeadAndInjured(actual, guess);
 
   if (guess && !isStaged) {
-    guessDivWrapper.setAttribute("disabled", "true");
-    guessDivWrapper.setAttribute("tab-index", `${guessTabIndex}`);
+    guessDivWrapper.setAttribute(ATTR_DISABLED, "true");
+    guessDivWrapper.setAttribute(ATTR_TAB_IDX, `${guessTabIndex}`);
 
     if (deadCount < actual.length) {
       deadCountWrapper.innerHTML = `${deadCount}`;
-      deadCountWrapper.setAttribute("title", `${deadCount} dead`);
+      deadCountWrapper.setAttribute(ATTR_TITLE, `${deadCount} dead`);
 
       injuredCountWrapper.innerHTML = `${injuredCount}`;
-      injuredCountWrapper.setAttribute("title", `${injuredCount} injured`);
+      injuredCountWrapper.setAttribute(ATTR_TITLE, `${injuredCount} injured`);
     } else {
       guessDivWrapper.classList.add(CLS_GUESS_ENTRY_SOLVED);
     }
   } else {
-    guessDivWrapper.setAttribute("disabled", "false");
+    guessDivWrapper.setAttribute(ATTR_DISABLED, "false");
   }
 
   return guessDivWrapper;
