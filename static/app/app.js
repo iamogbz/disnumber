@@ -746,13 +746,13 @@ function renderGuessEntry(guess, actual, isStaged, recycle) {
               .split("")
               .map((n, i) => {
                 if (n === actual[i]) return "🟩";
-                if (actual.includes(n)) return "🟧";
+                if (actual.includes(n)) return "🟥";
                 return profile.setting.darkMode ? "⬛" : "⬜";
               })
               .join("")
           )
           .join("\n");
-        const shareText = `Disnumber game: ${gameName}.\nSolved in ${guessCount} guesses.\n\n${guessLines}\n\n${gameUrl}`;
+        const shareText = `#Disnumber game: ${gameName}.\nSolved in ${guessCount} guesses.\n\n${guessLines}\n\n${gameUrl}`;
 
         const onCopySuccess = () => {
           guessDivWrapper.classList.add(CLS_GUESS_SOLVED_COPY_SUCCESS);
