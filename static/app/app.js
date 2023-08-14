@@ -300,7 +300,9 @@ function getSeed(dateObj) {
  * @param {string} stagedGuess
  */
 function _getSuggestion(actualNumber, submittedGuesses, stagedGuess) {
-  if (stagedGuess.length === actualNumber.length) return new Set();
+  const alreadyGuessedComplete = stagedGuess.length === actualNumber.length;
+  const alreadyGuessedCorrect = submittedGuesses.slice(-1)[0] === actualNumber;
+  if (alreadyGuessedComplete || alreadyGuessedCorrect) return new Set();
 
   const possible = allPossible(submittedGuesses, actualNumber).filter((p) =>
     p.startsWith(stagedGuess)
@@ -506,14 +508,9 @@ function renderKeyboard(active, disabled, inProgress) {
   );
   // highlight guide digits
   setTimeout(() => {
-    active?.forEach((k) => {
-      simpleKeyboard?.shadowRoot
-        ?.querySelector(`[data-key="${k}"]:not([${ATTR_DISABLED}])`)
-        ?.setAttribute(
-          "style",
-          "box-shadow: inset var(--color-injured) 0 0 0 0.1em"
-        );
-    });
+    simpleKeyboard?.shadowRoot
+      ?.querySelectorAll(`[aria-current="true"]`)
+      .forEach((e) => e.setAttribute("style", "color: var(--color-injured)"));
   });
   simpleKeyboard?.setAttribute(ATTR_DISABLED, String(Boolean(!inProgress)));
 }
