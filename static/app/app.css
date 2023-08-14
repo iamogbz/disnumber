@@ -22,9 +22,10 @@ html[theme="light"] #btn-theme-light {
 }
 
 * {
-  transition: border, border-width, height, margin, padding, transform,
-    width 0.2s ease-in-out, background-color, border-color, color,
-    opacity 0.3s ease-in-out;
+  transition-duration: 0.2s;
+  transition-property: border, border-width, height, margin, padding, transform,
+    width, background-color, border-color, color, opacity;
+  transition-timing-function: ease-in-out;
 }
 
 html,
@@ -181,7 +182,7 @@ main #guesses {
 }
 
 .guess-entry[aria-disabled="true"] .guess-digit {
-  background-color: color-mix(in srgb, var(--color-fg) 14%, transparent);
+  background-color: color-mix(in srgb, var(--color-fg) 20%, transparent);
   border-color: transparent;
 }
 

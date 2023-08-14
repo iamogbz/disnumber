@@ -43,7 +43,7 @@ const CLS_GUESS_SOLVED_COPY_SUCCESS = "guess-solved-copy-success";
 const CLS_GUESS_SOLVED_COPY_FAILURE = "guess-solved-copy-failure";
 const MAX_GUESS_COUNT = 9;
 const MAX_DIGIT_COUNT = 10;
-const DELAY_READ_MS = 3000;
+const DELAY_READ_MS = 2000;
 /** @type {{
   setting: {
     darkMode: boolean,
@@ -300,6 +300,8 @@ function getSeed(dateObj) {
  * @param {string} stagedGuess
  */
 function _getSuggestion(actualNumber, submittedGuesses, stagedGuess) {
+  if (stagedGuess.length === actualNumber.length) return new Set();
+
   const possible = allPossible(submittedGuesses, actualNumber).filter((p) =>
     p.startsWith(stagedGuess)
   );
