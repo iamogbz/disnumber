@@ -140,7 +140,7 @@ function initWith(profile) {
     if (isOverGuessLimit || lastGuessWasCorrect) {
       if (currentGame.inProgress && lastGuessWasCorrect) {
         // show stats dialog for just solved game
-        setTimeout(() => showDialog(ID_DIALOG_STATS), 300);
+        setTimeout(() => showDialog(ID_DIALOG_STATS), 3000);
       }
       currentGame.inProgress = false;
       currentGame.solved = lastGuessWasCorrect;

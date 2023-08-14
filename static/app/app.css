@@ -22,8 +22,9 @@ html[theme="light"] #btn-theme-light {
 }
 
 * {
-  transition: border, height, margin, padding, transform, width 0.2s ease-in-out,
-    background-color, border-color, color, opacity 0.3s ease-in-out;
+  transition: border, border-width, height, margin, padding, transform,
+    width 0.2s ease-in-out, background-color, border-color, color,
+    opacity 0.3s ease-in-out;
 }
 
 html,
@@ -190,7 +191,7 @@ main #guesses {
 
 .guess-entry.guess-correct::before {
   align-items: center;
-  content: 'Share results 📤';
+  content: "Correct! Share results 📤";
   display: flex;
   font-size: 0.5em;
   justify-content: center;
@@ -201,19 +202,33 @@ main #guesses {
   user-select: none;
 }
 .guess-entry.guess-correct.guess-solved-copy-success::before {
-  content: 'Copied results to clipboard 📋';
+  content: "Copied results to clipboard 📋";
 }
 .guess-entry.guess-correct.guess-solved-copy-failure::before {
-  content: 'Oops failed to copy results ❌';
+  content: "Oops failed to copy results ❌";
+}
+
+@keyframes correct-guess {
+  from {
+    border-image: linear-gradient(
+        to bottom right,
+        var(--color-dead),
+        var(--color-injured)
+      )
+      1;
+  }
+  to {
+    border-image: linear-gradient(
+        to bottom right,
+        var(--color-injured),
+        var(--color-dead)
+      )
+      1;
+  }
 }
 
 .guess-entry.guess-correct .guess-digit {
-  border-image: linear-gradient(
-      to bottom right,
-      var(--color-dead),
-      var(--color-injured)
-    )
-    1;
+  animation: correct-guess 0.3s ease-in-out 0s infinite alternate both;
 }
 
 .guess-entry .guess-digit {
