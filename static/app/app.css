@@ -191,7 +191,7 @@ main #guesses {
 
 .guess-entry.guess-correct::before {
   align-items: center;
-  content: "Correct! Share results 📤";
+  content: "Eureka! Share results 📤";
   display: flex;
   font-size: 0.5em;
   justify-content: center;
@@ -337,6 +337,11 @@ dialog form {
 #dialogStats #stat-details,
 #dialogStats #stat-unsolved {
   margin: 0.5em 0 1em;
+}
+
+#dialogStats #stat-share-results {
+  border-color: var(--color-dead);
+  float: right;
 }
 
 #dialogStats .stats-details-group,

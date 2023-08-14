@@ -11,6 +11,7 @@ const ID_DIALOG_HELP = "dialogHelp";
 const ID_DIALOG_STATS = "dialogStats";
 const ID_STAT_PLAY_COUNT = "stat-play-count";
 const ID_STAT_SOLVE_PRCNT = "stat-solve-percent";
+const ID_STAT_SHARE_RESULTS = "stat-share-results";
 const ID_STAT_DETAILS = "stat-details";
 const ID_STAT_UNSOLVED = "stat-unsolved";
 const KEY_BKSPC = "Backspace";
@@ -42,6 +43,7 @@ const CLS_GUESS_SOLVED_COPY_SUCCESS = "guess-solved-copy-success";
 const CLS_GUESS_SOLVED_COPY_FAILURE = "guess-solved-copy-failure";
 const MAX_GUESS_COUNT = 9;
 const MAX_DIGIT_COUNT = 10;
+const DELAY_READ_MS = 3000;
 /** @type {{
   setting: {
     darkMode: boolean,
@@ -140,7 +142,7 @@ function initWith(profile) {
     if (isOverGuessLimit || lastGuessWasCorrect) {
       if (currentGame.inProgress && lastGuessWasCorrect) {
         // show stats dialog for just solved game
-        setTimeout(() => showDialog(ID_DIALOG_STATS), 3000);
+        setTimeout(() => showDialog(ID_DIALOG_STATS), DELAY_READ_MS);
       }
       currentGame.inProgress = false;
       currentGame.solved = lastGuessWasCorrect;
@@ -552,6 +554,12 @@ function renderStatistics(profile, gameKey) {
     : 0;
   statSolveWrapper && (statSolveWrapper.innerText = `${statSolvePercent}`);
 
+  // stat share result button
+  const shareResultsBtn = document.getElementById(ID_STAT_SHARE_RESULTS);
+  if (shareResultsBtn) {
+    shareResultsBtn.onclick = () => shareResults();
+  }
+
   // set the stat details
   const statDetailsWrapper = document.getElementById(ID_STAT_DETAILS);
   statDetailsWrapper && (statDetailsWrapper.innerHTML = "");
@@ -730,78 +738,79 @@ function renderGuessEntry(guess, actual, isStaged, recycle) {
 
       injuredCountWrapper.innerHTML = `${injuredCount}`;
       injuredCountWrapper.setAttribute(ATTR_TITLE, `${injuredCount} injured`);
+
+      guessDivWrapper.removeEventListener("click", shareResults);
     } else {
       guessDivWrapper.classList.add(CLS_GUESS_ENTRY_SOLVED);
-      guessDivWrapper.addEventListener("click", async () => {
-        const gameDate = getGameDate();
-        const gameKey = getGameKey(gameDate);
-        const gameName = getDateString(gameDate);
-        const gameUrl = `https://ogbizi.com/dai-pwa#${gameKey}`;
-        const profile = loadProfile();
-        if (profile.stats[gameKey].guesses.slice(-1)[0] !== actual) return;
-        const guessCount = profile.stats[gameKey].guesses.length;
-        const guessLines = profile.stats[gameKey].guesses
-          .map((g) =>
-            g
-              .split("")
-              .map((n, i) => {
-                if (n === actual[i]) return "🟩";
-                if (actual.includes(n)) return "🟥";
-                return profile.setting.darkMode ? "⬛" : "⬜";
-              })
-              .join("")
-          )
-          .join("\n");
-        const shareText = `#Disnumber game: ${gameName}.\nSolved in ${guessCount} guesses.\n\n${guessLines}\n\n${gameUrl}`;
-
-        const onCopySuccess = () => {
-          guessDivWrapper.classList.add(CLS_GUESS_SOLVED_COPY_SUCCESS);
-        };
-        const onCopyFailure = () => {
-          guessDivWrapper.classList.add(CLS_GUESS_SOLVED_COPY_FAILURE);
-        };
-        const resetCopyState = () => {
-          setTimeout(() => {
-            guessDivWrapper.classList.remove(
-              CLS_GUESS_SOLVED_COPY_SUCCESS,
-              CLS_GUESS_SOLVED_COPY_FAILURE
-            );
-          }, 2000);
-        };
-
-        try {
-          try {
-            await navigator.clipboard.writeText(shareText);
-          } catch (e) {
-            console.error(e);
-            // Fallback for browsers without Clipboard API support
-            const textarea =
-              Array.from(document.getElementsByTagName("textarea")).find(
-                (elem) => elem.id === ID_RESULTS_WRAPPER
-              ) ?? document.createElement("textarea");
-            textarea.id = ID_RESULTS_WRAPPER;
-            textarea.value = shareText;
-            textarea.style.visibility = "invisible";
-            textarea.setAttribute(ATTR_HIDDEN, "true");
-            moveChildInto(document.body, textarea);
-            textarea.select();
-            document.execCommand("copy");
-            textarea.remove();
-          }
-          onCopySuccess();
-        } catch (e) {
-          console.error(e);
-          onCopyFailure();
-        } finally {
-          resetCopyState();
-        }
-      });
+      guessDivWrapper.addEventListener("click", shareResults);
     }
   } else {
     guessDivWrapper.setAttribute(ATTR_DISABLED, "false");
   }
 
   return guessDivWrapper;
+}
+
+async function shareResults() {
+  const gameDate = getGameDate();
+  const gameKey = getGameKey(gameDate);
+  const profile = loadProfile();
+  const currentGame = profile.stats[gameKey];
+  const numDigits = currentGame.guesses[0]?.length || profile.setting.digits;
+  const actual = getNumberForDate(numDigits, gameDate);
+  if (currentGame.guesses.slice(-1)[0] !== actual) return;
+
+  const gameName = getDateString(gameDate);
+  const gameUrl = `https://ogbizi.com/dai-pwa#${gameKey}`;
+  const guessCount = currentGame.guesses.length;
+  const guessLines = currentGame.guesses
+    .map((g) =>
+      g
+        .split("")
+        .map((n, i) => {
+          if (n === actual[i]) return "🟩";
+          if (actual.includes(n)) return "🟥";
+          return profile.setting.darkMode ? "⬛" : "⬜";
+        })
+        .join("")
+    )
+    .join("\n");
+  const shareText = `#Disnumber game: ${gameName}.\nSolved in ${guessCount} guesses.\n\n${guessLines}\n\n${gameUrl}`;
+  const guessDivWrapper = document
+    .getElementsByClassName(CLS_GUESS_ENTRY_SOLVED)
+    .item(0);
+
+  try {
+    try {
+      await navigator.clipboard.writeText(shareText);
+    } catch (e) {
+      console.error(e);
+      // Fallback for browsers without Clipboard API support
+      const textarea =
+        Array.from(document.getElementsByTagName("textarea")).find(
+          (elem) => elem.id === ID_RESULTS_WRAPPER
+        ) ?? document.createElement("textarea");
+      textarea.id = ID_RESULTS_WRAPPER;
+      textarea.value = shareText;
+      textarea.style.visibility = "invisible";
+      textarea.setAttribute(ATTR_HIDDEN, "true");
+      moveChildInto(document.body, textarea);
+      textarea.select();
+      document.execCommand("copy");
+      textarea.remove();
+    }
+    guessDivWrapper?.classList.add(CLS_GUESS_SOLVED_COPY_SUCCESS);
+  } catch (e) {
+    console.error(e);
+    guessDivWrapper?.classList.add(CLS_GUESS_SOLVED_COPY_FAILURE);
+  } finally {
+    setTimeout(() => {
+      guessDivWrapper?.classList.remove(
+        CLS_GUESS_SOLVED_COPY_SUCCESS,
+        CLS_GUESS_SOLVED_COPY_FAILURE
+      );
+    }, DELAY_READ_MS);
+  }
 }
 
 /**
