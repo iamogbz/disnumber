@@ -164,6 +164,57 @@ main #guesses {
   position: relative;
   z-index: 0;
 }
+.guess-entry::before {
+  align-items: center;
+  display: flex;
+  font-size: 0.5em;
+  justify-content: center;
+  padding: 1em;
+  position: absolute;
+  text-align: center;
+  top: 100%;
+  user-select: none;
+}
+
+.guess-entry.guess-correct {
+  cursor: pointer;
+}
+
+.guess-entry[aria-disabled="false"]::before {
+  content: "Enter a number 🔢";
+}
+.guess-entry.guess-correct::before {
+  content: "Eureka! Share results 📤";
+}
+.guess-entry.guess-correct.guess-solved-copy-success::before {
+  content: "Copied results to clipboard 📋";
+}
+.guess-entry.guess-correct.guess-solved-copy-failure::before {
+  content: "Oops failed to copy results ❌";
+}
+
+@keyframes correct-guess {
+  from {
+    border-image: linear-gradient(
+        to bottom right,
+        var(--color-dead),
+        var(--color-injured)
+      )
+      1;
+  }
+  to {
+    border-image: linear-gradient(
+        to bottom right,
+        var(--color-injured),
+        var(--color-dead)
+      )
+      1;
+  }
+}
+
+.guess-entry.guess-correct .guess-digit {
+  animation: correct-guess 0.3s ease-in-out 0s infinite alternate both;
+}
 
 .guess-entry span {
   align-items: center;
@@ -195,52 +246,6 @@ main #guesses {
 .guess-entry[aria-disabled="true"] .guess-digit {
   background-color: color-mix(in srgb, var(--color-fg) 20%, transparent);
   border-color: transparent;
-}
-
-.guess-entry.guess-correct {
-  cursor: pointer;
-}
-
-.guess-entry.guess-correct::before {
-  align-items: center;
-  content: "Eureka! Share results 📤";
-  display: flex;
-  font-size: 0.5em;
-  justify-content: center;
-  padding: 1em;
-  position: absolute;
-  text-align: center;
-  top: 100%;
-  user-select: none;
-}
-.guess-entry.guess-correct.guess-solved-copy-success::before {
-  content: "Copied results to clipboard 📋";
-}
-.guess-entry.guess-correct.guess-solved-copy-failure::before {
-  content: "Oops failed to copy results ❌";
-}
-
-@keyframes correct-guess {
-  from {
-    border-image: linear-gradient(
-        to bottom right,
-        var(--color-dead),
-        var(--color-injured)
-      )
-      1;
-  }
-  to {
-    border-image: linear-gradient(
-        to bottom right,
-        var(--color-injured),
-        var(--color-dead)
-      )
-      1;
-  }
-}
-
-.guess-entry.guess-correct .guess-digit {
-  animation: correct-guess 0.3s ease-in-out 0s infinite alternate both;
 }
 
 .guess-entry .guess-digit {

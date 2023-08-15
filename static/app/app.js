@@ -560,7 +560,7 @@ function renderStatistics(profile, gameKey) {
   // stat share result button
   const shareResultsBtn = document.getElementById(ID_STAT_SHARE_RESULTS);
   if (shareResultsBtn) {
-    shareResultsBtn.onclick = () => shareResults();
+    shareResultsBtn.onclick = shareResults;
   }
 
   // set the stat details
