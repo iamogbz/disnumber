@@ -4,9 +4,10 @@ const ID_OPT_DIGIT_COUNT = "opt-digits";
 const ID_SIMPLE_KEYBOARD = "keyboard";
 const ID_GUESSES_WRAPPER = "guesses";
 const ID_RESULTS_WRAPPER = "results";
+const ID_CURRENT_GAME_TITLE = "current-puzzle";
 const ID_LINK_PREV_DAY = "link-prev-day";
 const ID_LINK_NEXT_DAY = "link-next-day";
-const ID_CURRENT_DAY_TAG = "current-day";
+const ID_LINK_CURRENT_DAY = "current-day";
 const ID_DIALOG_HELP = "dialogHelp";
 const ID_DIALOG_STATS = "dialogStats";
 const ID_STAT_PLAY_COUNT = "stat-play-count";
@@ -469,12 +470,15 @@ function initGameDayControl(gameDate, gameKey) {
   }
 
   // curr day
-  const currentDayLabel = document.getElementById(ID_CURRENT_DAY_TAG);
-  currentDayLabel?.setAttribute(ATTR_LINK_URL, `#${gameKey}`);
-  currentDayLabel?.setAttribute(
+  const currentDayStr = getDateString(gameDate);
+  const linkToCurrentDay = document.getElementById(ID_LINK_CURRENT_DAY);
+  linkToCurrentDay?.setAttribute(ATTR_LINK_URL, `#${gameKey}`);
+  linkToCurrentDay?.setAttribute(
     ATTR_TITLE,
-    `Link to current game ${getDateString(gameDate)}`
+    `Link to current game ${currentDayStr}`
   );
+  const currentGameSubtitle = document.getElementById(ID_CURRENT_GAME_TITLE);
+  currentGameSubtitle && (currentGameSubtitle.innerText = currentDayStr);
 }
 
 /**

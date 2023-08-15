@@ -22,9 +22,9 @@ html[theme="light"] #btn-theme-light {
 }
 
 * {
-  transition-duration: 0.2s;
-  transition-property: border, border-width, height, margin, padding, transform,
-    width, background-color, border-color, color, opacity;
+  transition-duration: 0s;
+  transition-property: border, height, margin, padding, transform, width,
+    background-color, color, opacity;
   transition-timing-function: ease-in-out;
 }
 
@@ -120,6 +120,17 @@ header #configure-nav {
 
 header a {
   opacity: 1;
+}
+
+#game-title {
+  align-items: center;
+  display: flex;
+  justify-content: center;
+}
+
+#current-puzzle {
+  bottom: -0.1em;
+  position: absolute;
 }
 
 main {

@@ -2,6 +2,7 @@
 <html>
   <head>
     <meta charset="UTF-8" />
+    <meta name="description" content="Puzzle game, solve for the hidden number! Dead and Injured/Wounded. Bulls and Cows, Wordle precursor">
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
     <title>Disnumber ☠️ Game</title>
@@ -21,9 +22,10 @@
         <a id="current-day" href="#" title="Today">📅</a>
         <a id="link-next-day" href="#" title="1 day after">⏭️</a>
       </nav>
-      <h1>
-        <a href="#" title="Return to today's puzzle">DISNUMBER</a>
-      </h1>
+      <a id="game-title" href="#" title="Return to today's puzzle">
+        <h1>DISNUMBER</h1>
+        <sub id="current-puzzle"><script>document.write(new Date().toDateString())</script></sub>
+      </a>
       <nav id="configure-nav">
         <a id="link-help" tabindex="0" title="How to play" onclick="dialogHelp.showModal()">❓</a>
         <a id="link-stats" tabindex="0" title="Statistics" onclick="dialogStats.showModal()">📊</a>
