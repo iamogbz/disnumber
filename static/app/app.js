@@ -440,9 +440,10 @@ function initHintControl(profile) {
  * @param {String} gameKey
  */
 function initGameDayControl(gameKey) {
-  /** @type {HTMLInputElement} */
+  /** @type {HTMLInputElement | null} */
   // @ts-expect-error game field exists as html input element
   const gameDateInput = document.getElementById(ID_CURRENT_DATE_FIELD);
+  if (!gameDateInput) return;
   gameDateInput.value = gameKey;
   gameDateInput.max = getGameKey(new Date());
   gameDateInput.addEventListener("change", () => {
