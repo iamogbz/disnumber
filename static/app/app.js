@@ -43,7 +43,7 @@ const CLS_STATS_LINK_SOLVED_PUZZLE = "stats-link-unsolved";
 const CLS_GUESS_SOLVED_COPY_SUCCESS = "guess-solved-copy-success";
 const CLS_GUESS_SOLVED_COPY_FAILURE = "guess-solved-copy-failure";
 const MAX_GUESS_COUNT = 9;
-const MAX_DIGIT_COUNT = 10;
+const MAX_DIGIT_COUNT = ALLOWED_NUMBERS.length;
 const DELAY_READ_MS = 2000;
 /** @type {{
   setting: {
@@ -265,9 +265,11 @@ function getDateString(dateObj) {
  */
 function getNumberForDate(numDigits, dateObj) {
   const digitPool = [...ALLOWED_NUMBERS];
-  const selectFrom = `${Math.sin(getSeed(dateObj)) * Math.pow(10, 16)}`
+  const dateSeed = getSeed(dateObj);
+  const selectFrom = `${Math.sin(dateSeed) * Math.pow(10, 16)}`
     .split("")
-    .map(Number);
+    .map(Number)
+    .filter(Number.isInteger);
   /** @type {number[]} */ const generatedNumber = [];
   while (
     generatedNumber.length < Math.min(numDigits, MAX_DIGIT_COUNT) &&
@@ -821,7 +823,7 @@ async function shareResults() {
  * @param {number} [from]
  */
 function range(to, from = 0) {
-  return new Array(to - from + 1).fill(null).map((_, i) => from + i);
+  return new Array(Math.max(to - from + 1, 0)).fill(null).map((_, i) => from + i);
 }
 
 /**
