@@ -764,7 +764,7 @@ async function shareResults() {
   if (currentGame.guesses.slice(-1)[0] !== actual) return;
 
   const gameName = getDateString(gameDate);
-  const gameUrl = `https://ogbizi.com/dai-pwa#${gameKey}`;
+  const gameUrl = `https://ogbizi.com/disnumber#${gameKey}`;
   const guessCount = currentGame.guesses.length;
   const guessLines = currentGame.guesses
     .map((g) =>

@@ -4,20 +4,20 @@
   "name": "Disnumber",
   "short_name": "Disnumber",
   "display": "standalone",
-  "start_url": "/dai-pwa",
+  "start_url": "/disnumber",
   "icons": [
     {
-      "src": "https://raw.githubusercontent.com/iamogbz/dai-pwa/main/static/assets/images/logo-192.png",
+      "src": "https://raw.githubusercontent.com/iamogbz/disnumber/main/static/assets/images/logo-192.png",
       "sizes": "192x192",
       "type": "image/png"
     },
     {
-      "src": "https://raw.githubusercontent.com/iamogbz/dai-pwa/main/static/assets/images/logo-512.png",
+      "src": "https://raw.githubusercontent.com/iamogbz/disnumber/main/static/assets/images/logo-512.png",
       "sizes": "512x512",
       "type": "image/png"
     },
     {
-      "src": "https://raw.githubusercontent.com/iamogbz/dai-pwa/main/static/assets/images/logo-512.png",
+      "src": "https://raw.githubusercontent.com/iamogbz/disnumber/main/static/assets/images/logo-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
