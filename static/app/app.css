@@ -136,6 +136,7 @@ header a {
 
 #current-day {
   padding: 0.2em;
+  font-family: inherit;
   gap: 0.2em;
 }
 
