@@ -19,5 +19,7 @@ jobs:
         with:
           node-version-file: .nvmrc
       - uses: pnpm/action-setup@v2.2.1
+        with:
+          run_install: true
       - run: pnpm lint
       - run: pnpm test
