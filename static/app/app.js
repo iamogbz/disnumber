@@ -5,9 +5,7 @@ const ID_SIMPLE_KEYBOARD = "keyboard";
 const ID_GUESSES_WRAPPER = "guesses";
 const ID_RESULTS_WRAPPER = "results";
 const ID_CURRENT_GAME_TITLE = "current-puzzle";
-const ID_LINK_PREV_DAY = "link-prev-day";
-const ID_LINK_NEXT_DAY = "link-next-day";
-const ID_LINK_CURRENT_DAY = "current-day";
+const ID_CURRENT_DATE_FIELD = "current-day";
 const ID_DIALOG_HELP = "dialogHelp";
 const ID_DIALOG_STATS = "dialogStats";
 const ID_STAT_PLAY_COUNT = "stat-play-count";
@@ -27,7 +25,6 @@ const ATTR_CURRENT = "aria-current";
 const ATTR_DISABLED = "aria-disabled";
 const ATTR_FILLED = "filled";
 const ATTR_HIDDEN = "aria-hidden";
-const ATTR_LINK_URL = "href";
 const ATTR_OPEN = "open";
 const ATTR_TAB_IDX = "tab-index";
 const ATTR_TITLE = "title";
@@ -88,7 +85,7 @@ function initWith(profile) {
   initHintControl(profile);
   const gameDate = getGameDate();
   const gameKey = getGameKey(gameDate);
-  initGameDayControl(gameDate, gameKey);
+  initGameDayControl(gameKey);
 
   // show help on first load
   if (!Object.values(profile.stats).some((k) => k.solved))
@@ -441,46 +438,31 @@ function initHintControl(profile) {
 }
 
 /**
- * @param {Date} gameDate
  * @param {String} gameKey
  */
-function initGameDayControl(gameDate, gameKey) {
-  /** @param {Date} dateObj */
-  const gotoGameFor = (dateObj) => `Go to game for ${getDateString(dateObj)}`;
-  // prev day
-  const prevGameDate = new Date(gameDate.getTime());
-  prevGameDate.setDate(prevGameDate.getDate() - 1);
-  const prevDayGameKey = getGameKey(prevGameDate);
-  const linkToPreviousDay = document.getElementById(ID_LINK_PREV_DAY);
-  linkToPreviousDay?.setAttribute(ATTR_LINK_URL, `#${prevDayGameKey}`);
-  linkToPreviousDay?.setAttribute(ATTR_TITLE, gotoGameFor(prevGameDate));
+function initGameDayControl(gameKey) {
+  /** @type {HTMLInputElement | null} */
+  // @ts-expect-error game field exists as html input element
+  const gameDateInput = document.getElementById(ID_CURRENT_DATE_FIELD);
+  if (!gameDateInput) return;
 
-  // next day
-  const nextGameDate = new Date(gameDate.getTime());
-  const linkToNextDay = document.getElementById(ID_LINK_NEXT_DAY);
-  nextGameDate.setDate(nextGameDate.getDate() + 1);
-  if (nextGameDate.getTime() < Date.now()) {
-    const nextGameDateKey = getGameKey(nextGameDate);
-    linkToNextDay?.setAttribute(ATTR_LINK_URL, `#${nextGameDateKey}`);
-    linkToNextDay?.setAttribute(ATTR_TITLE, gotoGameFor(nextGameDate));
-  } else {
-    linkToNextDay?.setAttribute(ATTR_LINK_URL, "#");
-    linkToNextDay?.setAttribute(
-      ATTR_TITLE,
-      "Come back tomorrow for a new puzzle"
-    );
-  }
+  const setDateTitle = () => {
+    if (gameDateInput.valueAsDate) {
+      const currentDayStr = getDateString(gameDateInput.valueAsDate);
+      const currentGameSubtitle = document.getElementById(
+        ID_CURRENT_GAME_TITLE
+      );
+      currentGameSubtitle && (currentGameSubtitle.innerText = currentDayStr);
+    }
+  };
 
-  // curr day
-  const currentDayStr = getDateString(gameDate);
-  const linkToCurrentDay = document.getElementById(ID_LINK_CURRENT_DAY);
-  linkToCurrentDay?.setAttribute(ATTR_LINK_URL, `#${gameKey}`);
-  linkToCurrentDay?.setAttribute(
-    ATTR_TITLE,
-    `Link to current game ${currentDayStr}`
-  );
-  const currentGameSubtitle = document.getElementById(ID_CURRENT_GAME_TITLE);
-  currentGameSubtitle && (currentGameSubtitle.innerText = currentDayStr);
+  gameDateInput.value = gameKey;
+  gameDateInput.max = getGameKey(new Date());
+  gameDateInput.addEventListener("change", () => {
+    window.location.hash = gameDateInput.value;
+    setDateTitle();
+  });
+  setDateTitle();
 }
 
 /**
@@ -823,7 +805,9 @@ async function shareResults() {
  * @param {number} [from]
  */
 function range(to, from = 0) {
-  return new Array(Math.max(to - from + 1, 0)).fill(null).map((_, i) => from + i);
+  return new Array(Math.max(to - from + 1, 0))
+    .fill(null)
+    .map((_, i) => from + i);
 }
 
 /**

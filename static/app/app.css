@@ -130,7 +130,14 @@ header a {
 
 #current-puzzle {
   bottom: -0.1em;
+  opacity: 0;
   position: absolute;
+}
+
+#current-day {
+  padding: 0.2em;
+  font-family: inherit;
+  gap: 0.2em;
 }
 
 main {
@@ -443,8 +450,22 @@ footer simple-keyboard {
     padding: 0 0.2em;
   }
 
-  header nav #current-day {
-    display: none;
+  #current-puzzle {
+    opacity: 1;
+  }
+
+  #current-day {
+    background-color: transparent;
+    border: none;
+    gap: 0;
+    outline: none;
+    overflow: visible;
+    padding: 0;
+    width: 0;
+  }
+
+  #current-day::after {
+    content: "📅";
   }
 
   main {
