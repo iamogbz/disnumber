@@ -1,4 +1,5 @@
 const APP_KEY_PROFILE = "dai-app-profile";
+const ID_BTN_TOGGLE_EASY = "btn-easy-toggle";
 const ID_BTN_TOGGLE_HINT = "btn-hint-toggle";
 const ID_OPT_DIGIT_COUNT = "opt-digits";
 const ID_SIMPLE_KEYBOARD = "keyboard";
@@ -49,6 +50,7 @@ const DELAY_READ_MS = 2000;
     hints: {
       disableImpossible: boolean,
       enableBestGuesses: boolean,
+      enableEasyAnswers: boolean,
     },
   },
   stats: Record<string, {guesses: string[], inProgress: boolean, solved: boolean}>,
@@ -60,6 +62,7 @@ const EMPTY_PROFILE = Object.freeze({
     hints: {
       disableImpossible: true,
       enableBestGuesses: true,
+      enableEasyAnswers: true,
     },
   },
   stats: {},
@@ -344,17 +347,20 @@ function _allPossible(submittedGuesses, actualNumber) {
 /**
  * @param {string} actual
  * @param {string} guess
- * @returns {readonly [number, number]}
+ * @returns {readonly [string, string]}
  */
 function _countDeadAndInjured(actual, guess) {
-  let deadCount = 0;
-  let injuredCount = 0;
+  const identified = {
+    injured: "",
+    dead: "",
+  };
   actual.split("").map((n, i) => {
-    if (n === guess[i]) deadCount += 1;
-    if (guess.includes(n)) injuredCount += 1;
+    if (n === guess[i]) identified.dead += n;
+    else if (guess.includes(n)) identified.injured += n;
   });
-  injuredCount -= deadCount;
-  return Object.freeze([deadCount, injuredCount]);
+  identified.dead = identified.dead.split("").sort().join("");
+  identified.injured = identified.injured.split("").sort().join("");
+  return Object.freeze([identified.dead, identified.injured]);
 }
 
 /**
@@ -415,26 +421,50 @@ function initDigitControl(profile) {
  * @param {ReturnType<typeof loadProfile>} profile
  */
 function initHintControl(profile) {
-  const toggleButton = document.getElementById(ID_BTN_TOGGLE_HINT);
-  const setEnabled = (/** @type {boolean} */ enabled) => {
-    profile.setting.hints.disableImpossible = enabled;
-    profile.setting.hints.enableBestGuesses = enabled;
-  };
-  const isEnabled = () =>
-    profile.setting.hints.disableImpossible &&
-    profile.setting.hints.enableBestGuesses;
-  const updateControlToggle = () =>
-    toggleButton &&
-    (toggleButton.innerText = isEnabled() ? "Disable" : "Enable");
+  /**
+   * @param {ReturnType<typeof loadProfile>} profile
+   * @param {String} hintControlId
+   * @param {(e: boolean) => void} setEnabled
+   * @param {() => boolean} isEnabled
+   */
+  function initControl(profile, hintControlId, setEnabled, isEnabled) {
+    const toggleButton = document.getElementById(hintControlId);
+    const updateControlToggle = () =>
+      toggleButton &&
+      (toggleButton.innerText = isEnabled() ? "Disable" : "Enable");
 
-  toggleButton?.addEventListener("click", (e) => {
-    e.preventDefault();
-    setEnabled(!isEnabled());
-    saveProfile(profile);
+    toggleButton?.addEventListener("click", (e) => {
+      e.preventDefault();
+      setEnabled(!isEnabled());
+      saveProfile(profile);
+      updateControlToggle();
+      const gameKeyboard = document.getElementById(ID_SIMPLE_KEYBOARD);
+      gameKeyboard?.onkeyup?.(new KeyboardEvent("keyup"));
+    });
+
     updateControlToggle();
-  });
+  }
 
-  updateControlToggle();
+  initControl(
+    profile,
+    ID_BTN_TOGGLE_HINT,
+    (enabled) => {
+      profile.setting.hints.disableImpossible = enabled;
+      profile.setting.hints.enableBestGuesses = enabled;
+    },
+    () =>
+      profile.setting.hints.disableImpossible &&
+      profile.setting.hints.enableBestGuesses
+  );
+
+  initControl(
+    profile,
+    ID_BTN_TOGGLE_EASY,
+    (enabled) => {
+      profile.setting.hints.enableEasyAnswers = enabled;
+    },
+    () => profile.setting.hints.enableEasyAnswers
+  );
 }
 
 /**
@@ -673,6 +703,8 @@ function renderGuesses(guesses, actual, stagedGuess) {
  * @param {Element?} recycle
  */
 function renderGuessEntry(guess, actual, isStaged, recycle) {
+  const profile = loadProfile();
+
   const guessTabIndex = 0;
   const guessDivWrapper = recycle ?? document.createElement("div");
   guessDivWrapper.className = CLS_GUESS_ENTRY;
@@ -692,6 +724,19 @@ function renderGuessEntry(guess, actual, isStaged, recycle) {
   injuredCountWrapper.setAttribute(ATTR_TAB_IDX, `${guessTabIndex}`);
   moveChildInto(guessDivWrapper, injuredCountWrapper);
 
+  deadCountWrapper.setAttribute(
+    ATTR_HIDDEN,
+    `${profile.setting.hints.enableEasyAnswers}`
+  );
+  injuredCountWrapper.setAttribute(
+    ATTR_HIDDEN,
+    `${profile.setting.hints.enableEasyAnswers}`
+  );
+
+  const [dead, injured] = countDeadAndInjured(actual, guess);
+  const deadCount = dead.length;
+  const injuredCount = injured.length;
+
   const digitWrappers = guessDivWrapper.getElementsByClassName(CLS_GUESS_DIGIT);
   actual
     .split("")
@@ -704,6 +749,19 @@ function renderGuessEntry(guess, actual, isStaged, recycle) {
         ATTR_FILLED,
         String(!!digitWrapper.textContent)
       );
+      if (profile.setting.hints.enableEasyAnswers) {
+        digitWrapper.setAttribute(
+          CLS_GUESS_COUNT_DEAD,
+          `${dead.includes(guess[i])}`
+        );
+        digitWrapper.setAttribute(
+          CLS_GUESS_COUNT_INJURED,
+          `${injured.includes(guess[i])}`
+        );
+      } else {
+        digitWrapper.removeAttribute(CLS_GUESS_COUNT_DEAD);
+        digitWrapper.removeAttribute(CLS_GUESS_COUNT_INJURED);
+      }
       return digitWrapper;
     })
     .forEach((c) => moveChildInto(guessDivWrapper, c));
@@ -713,20 +771,21 @@ function renderGuessEntry(guess, actual, isStaged, recycle) {
     .forEach((w) => {
       guessDivWrapper.removeChild(w);
     });
-  const [deadCount, injuredCount] = countDeadAndInjured(actual, guess);
 
   if (guess && !isStaged) {
     guessDivWrapper.setAttribute(ATTR_DISABLED, "true");
     guessDivWrapper.setAttribute(ATTR_TAB_IDX, `${guessTabIndex}`);
 
     if (deadCount < actual.length) {
-      deadCountWrapper.innerHTML = `${deadCount}`;
-      deadCountWrapper.setAttribute(ATTR_TITLE, `${deadCount} dead`);
+      if (!profile.setting.hints.enableEasyAnswers) {
+        deadCountWrapper.innerHTML = `${deadCount}`;
+        deadCountWrapper.setAttribute(ATTR_TITLE, `${deadCount} dead`);
 
-      injuredCountWrapper.innerHTML = `${injuredCount}`;
-      injuredCountWrapper.setAttribute(ATTR_TITLE, `${injuredCount} injured`);
+        injuredCountWrapper.innerHTML = `${injuredCount}`;
+        injuredCountWrapper.setAttribute(ATTR_TITLE, `${injuredCount} injured`);
 
-      guessDivWrapper.removeEventListener("click", shareResults);
+        guessDivWrapper.removeEventListener("click", shareResults);
+      }
     } else {
       guessDivWrapper.classList.add(CLS_GUESS_ENTRY_SOLVED);
       guessDivWrapper.addEventListener("click", shareResults);

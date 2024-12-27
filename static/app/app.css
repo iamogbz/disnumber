@@ -243,11 +243,8 @@ main #guesses {
   z-index: var(--level-btm);
 }
 
-.guess-entry[aria-hidden="true"] span {
-  /* border-width: 0em; */
-  opacity: 0;
-  /* padding: 0em; */
-  /* visibility: hidden; */
+*[aria-hidden="true"] {
+  opacity: 0 !important;
 }
 
 .guess-entry[aria-disabled="true"] .guess-digit {
@@ -274,13 +271,21 @@ main #guesses {
 }
 
 .guess-entry .guess-dead {
-  color: var(--color-dead);
   right: calc(100% - 2em);
 }
 
 .guess-entry .guess-injured {
-  color: var(--color-injured);
   left: calc(100% - 2em);
+}
+
+.guess-entry .guess-dead,
+.guess-entry span[guess-dead="true"] {
+  color: var(--color-dead);
+}
+
+.guess-entry .guess-injured,
+.guess-entry span[guess-injured="true"] {
+  color: var(--color-injured);
 }
 
 .guess-entry[aria-disabled="true"]:not(.guess-correct) .guess-dead,
