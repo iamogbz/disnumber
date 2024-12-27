@@ -745,7 +745,7 @@ function renderGuessEntry(guess, actual, isStaged, recycle) {
         ATTR_FILLED,
         String(!!digitWrapper.textContent)
       );
-      if (profile.setting.hints.enableEasyAnswers) {
+      if (profile.setting.hints.enableEasyAnswers && !isStaged) {
         digitWrapper.setAttribute(
           CLS_GUESS_COUNT_DEAD,
           `${dead.includes(guess[i])}`
