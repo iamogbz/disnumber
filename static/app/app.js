@@ -48,7 +48,6 @@ const DELAY_READ_MS = 2000;
     darkMode: boolean,
     digits: number,
     hints: {
-      disableImpossible: boolean,
       enableBestGuesses: boolean,
       enableEasyAnswers: boolean,
     },
@@ -60,7 +59,6 @@ const EMPTY_PROFILE = Object.freeze({
     darkMode: false,
     digits: 4,
     hints: {
-      disableImpossible: true,
       enableBestGuesses: true,
       enableEasyAnswers: true,
     },
@@ -449,11 +447,9 @@ function initHintControl(profile) {
     profile,
     ID_BTN_TOGGLE_HINT,
     (enabled) => {
-      profile.setting.hints.disableImpossible = enabled;
       profile.setting.hints.enableBestGuesses = enabled;
     },
     () =>
-      profile.setting.hints.disableImpossible &&
       profile.setting.hints.enableBestGuesses
   );
 
