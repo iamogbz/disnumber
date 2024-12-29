@@ -135,41 +135,49 @@ testing("static/app/app.js", () => {
     });
   });
 
-  describe('getSuggestion', () => {
-    it('returns only possible combinations based on previous guesses', () => {
-      const actualNum = "0123"
+  describe("getSuggestion", () => {
+    it("returns only possible combinations based on previous guesses", () => {
+      const actualNum = "0123";
       // no guesses
-      expect(getSuggestion(actualNum, [], "").size).toEqual(10)
+      expect(getSuggestion(actualNum, [], "").size).toEqual(10);
       // no guesses and already entered some numbers
-      expect(getSuggestion(actualNum, [], "0").size).toEqual(9)
-      expect(getSuggestion(actualNum, [], "98").size).toEqual(8)
-      expect(getSuggestion(actualNum, [], "012").size).toEqual(7)
+      expect(getSuggestion(actualNum, [], "0").size).toEqual(9);
+      expect(getSuggestion(actualNum, [], "98").size).toEqual(8);
+      expect(getSuggestion(actualNum, [], "012").size).toEqual(7);
       // some guesses none correct
-      expect(getSuggestion(actualNum, ["5432"], "").size).toEqual(9)
+      expect(getSuggestion(actualNum, ["5432"], "").size).toEqual(8);
       // some guesses none correct and already entered some numbers
-      expect(getSuggestion(actualNum, ["5432"], "0").size).toEqual(8)
-      expect(getSuggestion(actualNum, ["5432"], "98").size).toEqual(3)
-      expect(getSuggestion(actualNum, ["5432"], "012").size).toEqual(3)
+      expect(getSuggestion(actualNum, ["5432"], "0").size).toEqual(7);
+      expect(getSuggestion(actualNum, ["5432"], "98").size).toEqual(1);
+      expect(getSuggestion(actualNum, ["5432"], "012").size).toEqual(1);
       // some guesses some already eliminated
-      expect(getSuggestion(actualNum, ["9876"], "").size).toEqual(6)
+      expect(getSuggestion(actualNum, ["9876"], "").size).toEqual(6);
       // some guesses some already eliminated and entered some numbers
-      expect(getSuggestion(actualNum, ["9876"], "0").size).toEqual(5)
-      expect(getSuggestion(actualNum, ["9876"], "98").size).toEqual(0)
-      expect(getSuggestion(actualNum, ["9876"], "012").size).toEqual(3)
+      expect(getSuggestion(actualNum, ["9876"], "0").size).toEqual(5);
+      expect(getSuggestion(actualNum, ["9876"], "98").size).toEqual(0);
+      expect(getSuggestion(actualNum, ["9876"], "012").size).toEqual(3);
       // some guesses all found
-      expect(getSuggestion(actualNum, ["3012"], "").size).toEqual(3)
+      expect(getSuggestion(actualNum, ["3012"], "").size).toEqual(3);
       // some guesses all found and already entered some numbers
-      expect(getSuggestion(actualNum, ["3012"], "0").size).toEqual(3)
-      expect(getSuggestion(actualNum, ["3012"], "98").size).toEqual(0)
-      expect(getSuggestion(actualNum, ["3012"], "012").size).toEqual(1)
+      expect(getSuggestion(actualNum, ["3012"], "0").size).toEqual(3);
+      expect(getSuggestion(actualNum, ["3012"], "98").size).toEqual(0);
+      expect(getSuggestion(actualNum, ["3012"], "012").size).toEqual(1);
       // some guesses all eliminated
-      expect(getSuggestion(actualNum, ["3012", "2301", "1230"], "").size).toEqual(1)
+      expect(
+        getSuggestion(actualNum, ["3012", "2301", "1230"], "").size
+      ).toEqual(1);
       // some guesses all eliminated and already entered some numbers
-      expect(getSuggestion(actualNum, ["3012", "2301", "1230"], "0").size).toEqual(1)
-      expect(getSuggestion(actualNum, ["3012", "2301", "1230"], "01").size).toEqual(1)
-      expect(getSuggestion(actualNum, ["3012", "2301", "1230"], "012").size).toEqual(1)
-    })
-  })
+      expect(
+        getSuggestion(actualNum, ["3012", "2301", "1230"], "0").size
+      ).toEqual(1);
+      expect(
+        getSuggestion(actualNum, ["3012", "2301", "1230"], "01").size
+      ).toEqual(1);
+      expect(
+        getSuggestion(actualNum, ["3012", "2301", "1230"], "012").size
+      ).toEqual(1);
+    });
+  });
 
   describe("range", () => {
     it.each([

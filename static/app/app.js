@@ -449,8 +449,7 @@ function initHintControl(profile) {
     (enabled) => {
       profile.setting.hints.enableBestGuesses = enabled;
     },
-    () =>
-      profile.setting.hints.enableBestGuesses
+    () => profile.setting.hints.enableBestGuesses
   );
 
   initControl(
