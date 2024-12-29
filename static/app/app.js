@@ -60,7 +60,7 @@ const EMPTY_PROFILE = Object.freeze({
     digits: 4,
     hints: {
       enableBestGuesses: true,
-      enableEasyAnswers: true,
+      enableEasyAnswers: false,
     },
   },
   stats: {},
