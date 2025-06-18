@@ -145,11 +145,11 @@ testing("static/app/app.js", () => {
       expect(getSuggestion(actualNum, [], "98").size).toEqual(8);
       expect(getSuggestion(actualNum, [], "012").size).toEqual(7);
       // some guesses none correct
-      expect(getSuggestion(actualNum, ["5432"], "").size).toEqual(8);
+      expect(getSuggestion(actualNum, ["5432"], "").size).toEqual(9);
       // some guesses none correct and already entered some numbers
-      expect(getSuggestion(actualNum, ["5432"], "0").size).toEqual(7);
-      expect(getSuggestion(actualNum, ["5432"], "98").size).toEqual(1);
-      expect(getSuggestion(actualNum, ["5432"], "012").size).toEqual(1);
+      expect(getSuggestion(actualNum, ["5432"], "0").size).toEqual(8);
+      expect(getSuggestion(actualNum, ["5432"], "98").size).toEqual(3);
+      expect(getSuggestion(actualNum, ["5432"], "012").size).toEqual(3);
       // some guesses some already eliminated
       expect(getSuggestion(actualNum, ["9876"], "").size).toEqual(6);
       // some guesses some already eliminated and entered some numbers
@@ -176,6 +176,14 @@ testing("static/app/app.js", () => {
       expect(
         getSuggestion(actualNum, ["3012", "2301", "1230"], "012").size
       ).toEqual(1);
+    });
+
+    it("correctly includes all possible suggestions", () => {
+      const actualNum = "5097";
+      const guesses = ["4321", "9876"];
+      const allSuggestions = allPossible(guesses, actualNum);
+      expect(allSuggestions).toContain(actualNum);
+      expect(allSuggestions).toContain("8065");
     });
   });
 

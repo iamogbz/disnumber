@@ -326,8 +326,10 @@ function _allPossible(submittedGuesses, actualNumber) {
     const [latestSubmitted] = submittedGuesses.slice(-1);
     return allPossible(submittedGuesses.slice(0, -1), actualNumber).filter(
       (guess) => {
-        const countActual = countDeadAndInjured(actualNumber, latestSubmitted);
-        const countGuess = countDeadAndInjured(guess, latestSubmitted);
+        // the only valid guesses are those that have the same
+        // number of dead and injured as all the submitted guess
+        const countActual = countDeadAndInjured(actualNumber, latestSubmitted).map(s => s.length);
+        const countGuess = countDeadAndInjured(guess, latestSubmitted).map(s => s.length);
         return JSON.stringify(countActual) === JSON.stringify(countGuess);
       }
     );
