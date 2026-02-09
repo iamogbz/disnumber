@@ -1,8 +1,10 @@
 <!DOCTYPE html>
 <html>
-  <head>
+
+<head>
     <meta charset="UTF-8" />
-    <meta name="description" content="Puzzle game, solve for the hidden number! Dead and Injured/Wounded. Bulls and Cows, Wordle precursor">
+    <meta name="description"
+        content="Puzzle game, solve for the hidden number! Dead and Injured/Wounded. Bulls and Cows, Wordle precursor">
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
     <title>Disnumber ☠️ Game</title>
@@ -10,185 +12,209 @@
     <link rel="stylesheet" href="static/app/app.css" />
     <!-- icons -->
     <link rel="icon" href="https://raw.githubusercontent.com/iamogbz/disnumber/main/static/assets/images/favicon.png" />
-    <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/iamogbz/disnumber/main/static/assets/images/logo-192.png" />
-    <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/iamogbz/disnumber/main/static/assets/images/logo-512.png" />
+    <link rel="apple-touch-icon"
+        href="https://raw.githubusercontent.com/iamogbz/disnumber/main/static/assets/images/logo-192.png" />
+    <link rel="apple-touch-icon"
+        href="https://raw.githubusercontent.com/iamogbz/disnumber/main/static/assets/images/logo-512.png" />
     <!-- scripts -->
     <script src="https://cdn.jsdelivr.net/gh/iamogbz/oh-my-wcs@main/components/simple-keyboard.js"></script>
     <!--- Google adsense -->
     <meta name="google-adsense-account" content="ca-pub-3505239651298035">
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3505239651298035"
-     crossorigin="anonymous"></script>
+        crossorigin="anonymous"></script>
     <!-- Google tag (gtag.js) ogbizi.com/disnumber -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-L5X6KEQN5C"></script>
     <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-      gtag('config', 'G-L5X6KEQN5C');
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+        gtag('config', 'G-L5X6KEQN5C');
     </script>
     <!-- Google tag (gtag.js) disnumber.com -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-0V6HHVFF8V"></script>
     <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-      gtag('config', 'G-0V6HHVFF8V');
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+        gtag('config', 'G-0V6HHVFF8V');
     </script>
-  </head>
-  <body>
+</head>
+
+<body>
     <header>
-      <nav id="game-date-nav">
-        <input type="date" name="current-day" id="current-day" pattern="\d{4}-\d{2}-\d{2}" />
-      </nav>
-      <a id="game-title" href="#" title="Return to today's puzzle">
-        <h1>DISNUMBER</h1>
-        <sub id="current-puzzle"><script>document.write(new Date().toDateString())</script></sub>
-      </a>
-      <nav id="configure-nav">
-        <a id="link-help" tabindex="0" title="How to play" onclick="dialogHelp.showModal()">❓</a>
-        <a id="link-stats" tabindex="0" title="Statistics" onclick="dialogStats.showModal()">📊</a>
-        <a id="link-settings" tabindex="0" title="Settings" onclick="dialogConfig.showModal()">🛠️</a>
-      </nav>
+        <nav id="game-date-nav">
+            <input type="date" name="current-day" id="current-day" pattern="\d{4}-\d{2}-\d{2}" />
+        </nav>
+        <a id="game-title" href="#" title="Return to today's puzzle">
+            <h1>DISNUMBER</h1>
+            <sub id="current-puzzle">
+                <script>document.write(new Date().toDateString())</script>
+            </sub>
+        </a>
+        <nav id="configure-nav">
+            <a id="link-help" tabindex="0" title="How to play" onclick="dialogHelp.showModal()">❓</a>
+            <a id="link-stats" tabindex="0" title="Statistics" onclick="dialogStats.showModal()">📊</a>
+            <a id="link-settings" tabindex="0" title="Settings" onclick="dialogConfig.showModal()">🛠️</a>
+        </nav>
     </header>
     <main>
-      <div id="guesses"></div>
+        <div id="guesses"></div>
     </main>
     <footer>
-      <simple-keyboard id="keyboard"></simple-keyboard>
-      <p id="label-copyright">&copy <script>document.write(new Date().getFullYear())</script> Ogbizi</p>
+        <simple-keyboard id="keyboard"></simple-keyboard>
+        <p id="label-copyright">&copy
+            <script>document.write(new Date().getFullYear())</script> Ogbizi
+        </p>
+
+        <p className="inline-block mr-2">Other Games</p>
+        <p>
+            <a href="https://wordsync.ogbizi.com/" target="_blank" className="inline-block mr-2">
+                <img alt="Word Sync" width="24" src="https://wordsync.ogbizi.com/favicon.ico" />
+            </a>
+            <a href="https://scrabblex.ogbizi.com/" target="_blank" className="inline-block mr-2">
+                <img alt="Scrabblex" width="24" src="https://scrabblex.ogbizi.com/favicon.ico" />
+            </a>
+            <a href="https://chaos-chess.ogbizi.com/" target="_blank" className="inline-block mr-2">
+                <img width="24" src="https://chaos-chess.ogbizi.com/favicon.ico" alt="Chaos Chess" />
+            </a>
+        </p>
     </footer>
     <dialog id="dialogHelp">
-      <form method="dialog">
-        <h2>How To Play</h2>
-        <p>Guess the number in less than 9 attempts</p>
-        <ul>
-          <li>Each guess must not have any repeating digits, the hidden number is all unique digits</li>
-          <li>The number to the left of the guess shows how many digits are in the correct position</li>
-          <li>The number to the right of the guess shows how many digits are in the wrong position</li>
-        </ul>
-        <h3>Examples</h3>
-        <div class="example-entry">
-          <div class="guess-entry" title="1347" aria-disabled="true" tab-index="0" aria-hidden="false">
-            <span class="guess-dead" tab-index="0" title="0 dead">0</span>
-            <span class="guess-injured" tab-index="0" title="3 injured">3</span>
-            <span class="guess-digit" filled="true">1</span>
-            <span class="guess-digit"filled="true">3</span>
-            <span class="guess-digit" filled="true">4</span>
-            <span class="guess-digit" filled="true">7</span>
-          </div>
-          <span>
-            The guess <code>1347</code> has <code>3</code> digits correct but they are in the wrong position.
-          </span>
-        </div>
-        <div class="example-entry">
-          <div class="guess-entry" title="7134" aria-disabled="true" tab-index="0" aria-hidden="false">
-            <span class="guess-dead" tab-index="0" title="3 dead">3</span>
-            <span class="guess-injured" tab-index="0" title="0 injured">0</span>
-            <span class="guess-digit" filled="true">7</span>
-            <span class="guess-digit"filled="true">1</span>
-            <span class="guess-digit" filled="true">3</span>
-            <span class="guess-digit" filled="true">4</span>
-          </div>
-          <span>
-            The guess <code>7134</code> has <code>3</code> digits correct and they are all in the correct position.
-          </span>
-        </div>
-        <div class="example-entry">
-          <div class="guess-entry" title="3147" aria-disabled="true" tab-index="0" aria-hidden="false">
-            <span class="guess-dead" tab-index="0" title="1 dead">1</span>
-            <span class="guess-injured" tab-index="0" title="2 injured">2</span>
-            <span class="guess-digit" filled="true">3</span>
-            <span class="guess-digit"filled="true">1</span>
-            <span class="guess-digit" filled="true">4</span>
-            <span class="guess-digit" filled="true">7</span>
-          </div>
-          <span>
-            The guess <code>3147</code> has <code>3</code> digits correct but <code>2</code> are in the wrong position.
-          </span>
-        </div>
-        <br />
-        <button>Close</button>
-      </form>
+        <form method="dialog">
+            <h2>How To Play</h2>
+            <p>Guess the number in less than 9 attempts</p>
+            <ul>
+                <li>Each guess must not have any repeating digits, the hidden number is all unique digits</li>
+                <li>The number to the left of the guess shows how many digits are in the correct position</li>
+                <li>The number to the right of the guess shows how many digits are in the wrong position</li>
+            </ul>
+            <h3>Examples</h3>
+            <div class="example-entry">
+                <div class="guess-entry" title="1347" aria-disabled="true" tab-index="0" aria-hidden="false">
+                    <span class="guess-dead" tab-index="0" title="0 dead">0</span>
+                    <span class="guess-injured" tab-index="0" title="3 injured">3</span>
+                    <span class="guess-digit" filled="true">1</span>
+                    <span class="guess-digit" filled="true">3</span>
+                    <span class="guess-digit" filled="true">4</span>
+                    <span class="guess-digit" filled="true">7</span>
+                </div>
+                <span>
+                    The guess <code>1347</code> has <code>3</code> digits correct but they are in the wrong position.
+                </span>
+            </div>
+            <div class="example-entry">
+                <div class="guess-entry" title="7134" aria-disabled="true" tab-index="0" aria-hidden="false">
+                    <span class="guess-dead" tab-index="0" title="3 dead">3</span>
+                    <span class="guess-injured" tab-index="0" title="0 injured">0</span>
+                    <span class="guess-digit" filled="true">7</span>
+                    <span class="guess-digit" filled="true">1</span>
+                    <span class="guess-digit" filled="true">3</span>
+                    <span class="guess-digit" filled="true">4</span>
+                </div>
+                <span>
+                    The guess <code>7134</code> has <code>3</code> digits correct and they are all in the correct
+                    position.
+                </span>
+            </div>
+            <div class="example-entry">
+                <div class="guess-entry" title="3147" aria-disabled="true" tab-index="0" aria-hidden="false">
+                    <span class="guess-dead" tab-index="0" title="1 dead">1</span>
+                    <span class="guess-injured" tab-index="0" title="2 injured">2</span>
+                    <span class="guess-digit" filled="true">3</span>
+                    <span class="guess-digit" filled="true">1</span>
+                    <span class="guess-digit" filled="true">4</span>
+                    <span class="guess-digit" filled="true">7</span>
+                </div>
+                <span>
+                    The guess <code>3147</code> has <code>3</code> digits correct but <code>2</code> are in the wrong
+                    position.
+                </span>
+            </div>
+            <br />
+            <button>Close</button>
+        </form>
     </dialog>
     <dialog id="dialogStats">
-      <form method="dialog">
-        <h2>Statistics</h2>
-        <div id="stat-summary">
-          <div class="stat-tile">
-            <h3 id="stat-play-count"></h3>
-            <span>Played</span>
-          </div>
-          <div class="stat-tile">
-            <h3 id="stat-solve-percent"></h3>
-            <span>Solve %</span>
-          </div>
-        </div>
-        <h3>Breakdown</h3>
-        <div id="stat-details"></div>
-        <h3>Unfinished</h3>
-        <div id="stat-unsolved"></div>
-        <button>Close</button>
-        <button id="stat-share-results">Share results 📤</button>
-      </form>
+        <form method="dialog">
+            <h2>Statistics</h2>
+            <div id="stat-summary">
+                <div class="stat-tile">
+                    <h3 id="stat-play-count"></h3>
+                    <span>Played</span>
+                </div>
+                <div class="stat-tile">
+                    <h3 id="stat-solve-percent"></h3>
+                    <span>Solve %</span>
+                </div>
+            </div>
+            <h3>Breakdown</h3>
+            <div id="stat-details"></div>
+            <h3>Unfinished</h3>
+            <div id="stat-unsolved"></div>
+            <button>Close</button>
+            <button id="stat-share-results">Share results 📤</button>
+        </form>
     </dialog>
     <dialog id="dialogConfig">
-      <form method="dialog">
-        <h2>Settings</h2>
-        <br />
-        <div class="config-opt">
-          <span class="opt-desc">
-            <h3>Theme</h3>
-            <sub>Takes effect immediately</sub>
-          </span>
-          <span class="opt-ctrl"><button id="btn-theme-light">Light</button><button id="btn-theme-dark">Dark</button></span>
-        </div>
-        <div class="config-opt">
-          <span class="opt-desc">
-            <h3>Hints</h3>
-            <sub>Provide guide towards the solution</sub>
-          </span>
-          <span class="opt-ctrl"><button id="btn-hint-toggle">Enable</button></span>
-        </div>
-        <div class="config-opt">
-          <span class="opt-desc">
-            <h3>Easy mode</h3>
-            <sub>Highlight the exact digits that are dead or injured</sub>
-          </span>
-          <span class="opt-ctrl"><button id="btn-easy-toggle">Enable</button></span>
-        </div>
-        <div class="config-opt">
-          <span class="opt-desc">
-            <h3>Digits</h3>
-            <sub>Increase for a challenge, applies to the next new puzzle</sub>
-          </span>
-          <span class="opt-ctrl"><select id="opt-digits"></select></span>
-        </div>
-        <div class="config-opt">
-          <span class="opt-desc">
-            <h3>Review</h3>
-            <sub>request feature, report a bug</sub>
-          </span>
-          <span class="opt-ctrl">
-            <a id="link-feedback" href="https://github.com/iamogbz/disnumber/issues/new/choose" target="_blank">
-              Feedback
-            </a>
-          </span>
-        </div>
-        <div class="config-opt">
-          <span class="opt-desc">
-            <h3>Community</h3>
-            <sub>start or join discussions</sub>
-          </span>
-          <span class="opt-ctrl">
-            <a id="link-feedback" href="https://github.com/iamogbz/disnumber/discussions" target="_blank">
-              Discuss
-            </a>
-          </span>
-        </div>
-        <br />
-        <button>Close</button>
-      </form>
+        <form method="dialog">
+            <h2>Settings</h2>
+            <br />
+            <div class="config-opt">
+                <span class="opt-desc">
+                    <h3>Theme</h3>
+                    <sub>Takes effect immediately</sub>
+                </span>
+                <span class="opt-ctrl"><button id="btn-theme-light">Light</button><button
+                        id="btn-theme-dark">Dark</button></span>
+            </div>
+            <div class="config-opt">
+                <span class="opt-desc">
+                    <h3>Hints</h3>
+                    <sub>Provide guide towards the solution</sub>
+                </span>
+                <span class="opt-ctrl"><button id="btn-hint-toggle">Enable</button></span>
+            </div>
+            <div class="config-opt">
+                <span class="opt-desc">
+                    <h3>Easy mode</h3>
+                    <sub>Highlight the exact digits that are dead or injured</sub>
+                </span>
+                <span class="opt-ctrl"><button id="btn-easy-toggle">Enable</button></span>
+            </div>
+            <div class="config-opt">
+                <span class="opt-desc">
+                    <h3>Digits</h3>
+                    <sub>Increase for a challenge, applies to the next new puzzle</sub>
+                </span>
+                <span class="opt-ctrl"><select id="opt-digits"></select></span>
+            </div>
+            <div class="config-opt">
+                <span class="opt-desc">
+                    <h3>Review</h3>
+                    <sub>request feature, report a bug</sub>
+                </span>
+                <span class="opt-ctrl">
+                    <a id="link-feedback" href="https://github.com/iamogbz/disnumber/issues/new/choose" target="_blank">
+                        Feedback
+                    </a>
+                </span>
+            </div>
+            <div class="config-opt">
+                <span class="opt-desc">
+                    <h3>Community</h3>
+                    <sub>start or join discussions</sub>
+                </span>
+                <span class="opt-ctrl">
+                    <a id="link-feedback" href="https://github.com/iamogbz/disnumber/discussions" target="_blank">
+                        Discuss
+                    </a>
+                </span>
+            </div>
+            <br />
+            <button>Close</button>
+        </form>
     </dialog>
     <script src="static/app/app.js"></script>
-  </body>
+</body>
+
 </html>
